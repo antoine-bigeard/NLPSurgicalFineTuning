@@ -128,7 +128,7 @@ def run_ft(
         )
 
         for repeat in range(args.repeats):
-            if repeat > 0:
+            if repeat >= 0:
                 print(f"Beginning repeat #{repeat}")
                 fine_tuned = ft_bert(model, tokenizer, train["x"], train["y"], mode)
                 val_acc = eval(fine_tuned, tokenizer, val)
