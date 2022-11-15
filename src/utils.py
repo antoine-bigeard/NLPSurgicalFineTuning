@@ -78,13 +78,16 @@ def get_data(dataset: str, num_samples: int, start_index: int):
     y = [s - 1 for s in d["star_rating"]]
     df = defaultdict(lambda: [None] * 5 * num_samples)
     counts = defaultdict(int)
+    end_idx = 0
     for idx in range(start_index, len(y)):
         c = counts[y[idx]]
         if c < num_samples:
             df["x"][c * 5 + y[idx]] = x[idx]
             df["y"][c * 5 + y[idx]] = y[idx]
             counts[y[idx]] += 1
-    return df
+            end_idx += 1
+
+    return df, end_idx
 
 
 def get_dataset(
@@ -94,7 +97,7 @@ def get_dataset(
     n_train: int,
     n_val: int = 100,
 ):
-    val_data = get_data(val_dataset, n_val, 0)
+    val_data, end_idx_val = get_data(val_dataset, n_val, 0)
 
     train_data = defaultdict()
     train_data["x"] = []
@@ -103,7 +106,11 @@ def get_dataset(
         dataset = d
         split = percentages[i]
         num_samples = int((n_train * split) / 100)
-        df = get_data(dataset, num_samples, 5 * n_val)
+        df, _ = get_data(
+            dataset,
+            num_samples,
+            start_index=end_idx_val if dataset == val_dataset else 0,
+        )
         train_data["x"].extend(df["x"])
         train_data["y"].extend(df["y"])
 
