@@ -119,7 +119,8 @@ def metric_for_dataset(dataset: str):
         'xsum': 'rouge',
         'trivia': 'exact match',
         'babi': 'exact match',
-        'amazon': 'classification accuracy',
+        'amazon_books': 'classification accuracy',
+        'amazon_video': 'classification accuracy',
     }[dataset]
 
 
