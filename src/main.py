@@ -91,7 +91,6 @@ def run_ft(models: List[str], datasets: List[str], percentages: List[int], val_d
         for repeat in range(args.repeats):
             if repeat > 0:
                 print(f'Beginning repeat #{repeat}')
-            if dataset == 'amazon':
                 fine_tuned = ft_bert(model, tokenizer, train['x'][:k*5], train['y'][:k*5], mode)
                 val_acc = eval(fine_tuned, tokenizer, val)
                 results['_'.join([model_name, dataset, str(k), mode])] = val_acc
