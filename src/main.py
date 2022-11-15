@@ -23,7 +23,9 @@ import yaml
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--model")
-parser.add_argument("--datasets")
+parser.add_argument("--dataset")
+parser.add_argument("--percentages")
+parser.add_argument("--val_dataset")
 parser.add_argument("--mode", default="all")
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
@@ -117,4 +119,5 @@ def run_ft(models: List[str], datasets: List[str], percentages: List[int], val_d
             results = {}
 
 if __name__ == "__main__":
-    run_ft(args.model.split(","), args.dataset.split(","), args.percentages.split(","), args.val_dataset, args.mode.split(","))
+    percentages = [int(k) for k in args.percentages.split(",")]
+    run_ft(args.model.split(","), args.dataset.split(","), percentages, args.val_dataset, args.mode.split(","))
