@@ -1,7 +1,12 @@
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 870fc25 (adding project code structure)
 from collections import defaultdict
 import datasets
 import transformers
 import logging
+<<<<<<< HEAD
 import numpy as np
 
 logging.basicConfig()
@@ -10,6 +15,30 @@ LOG = logging.getLogger(__name__)
 datasets.logging.set_verbosity_error()
 
 
+=======
+import numpy as np
+
+logging.basicConfig()
+LOG = logging.getLogger(__name__)
+
+datasets.logging.set_verbosity_error()
+
+
+=======
+import yaml
+import datasets
+import transformers
+import numpy as np
+import pandas as pd
+from typing import List
+from collections import defaultdict
+
+
+def read_yaml_config_file(path_config: str):
+    with open(path_config) as conf:
+        return yaml.load(conf, yaml.FullLoader)
+
+>>>>>>> 870fc25 (adding project code structure)
 def model2hfname(model: str) -> str:
     return {
         'bert-tiny': 'prajjwal1/bert-tiny',
@@ -25,11 +54,19 @@ def model2hfname(model: str) -> str:
         'neo': 'EleutherAI/gpt-neo-2.7B',
     }[model]
 
+<<<<<<< HEAD
 
 def dataset2hfname(dataset: str) -> str:
     return {
         'mnli': ('multi_nli',),
         'amazon': ('amazon_us_reviews', 'Video_v1_00'),
+=======
+def dataset2hfname(dataset: str) -> str:
+    return {
+        'mnli': ('multi_nli',),
+        'amazon_video': ('amazon_us_reviews', 'Video_v1_00'),
+        'amazon_books': ('amazon_us_reviews', 'Books_v1_00'),
+>>>>>>> 870fc25 (adding project code structure)
         'cnn': ('cnn_dailymail', '3.0.0'),
         'math': ('math_qa',),
         'tos': ('ought/raft', 'terms_of_service'),
@@ -37,6 +74,7 @@ def dataset2hfname(dataset: str) -> str:
         'babi': ('babi_qa', 'en-valid-10k-qa1')
     }[dataset]
 
+<<<<<<< HEAD
 
 def get_dataset(dataset: str, n_train: int, n_val: int = 100):
     if dataset == 'cnn':
@@ -117,6 +155,8 @@ def get_dataset(dataset: str, n_train: int, n_val: int = 100):
         raise NotImplementedError(f'{dataset}')
 
 
+=======
+>>>>>>> 870fc25 (adding project code structure)
 def is_qa_dataset(dataset: str) -> bool:
     return dataset in ['trivia', 'babi']
 
@@ -136,7 +176,43 @@ def max_sampled_tokens_for_dataset(dataset: str) -> int:
         'xsum': 30,
     }[dataset]
 
+<<<<<<< HEAD
 
+=======
+def get_data(dataset: str, num_samples: int, start_index: int):
+    d = datasets.load_dataset(dataset2hfname[dataset][0], dataset2hfname[dataset][1])['train']
+    filter_fn = lambda rows: ['sex' not in r.lower() for r in rows['review_body']]
+    d = d.filter(filter_fn, batched=True, batch_size=None)
+    x = d['review_body']
+    y = [s - 1 for s in d['star_rating']]
+    df = defaultdict(lambda: [None] * 5 * num_samples)
+    counts = defaultdict(int)
+    for idx in range(len(y)):
+        c = counts[y[idx]]
+        if c < num_samples:
+            df['x'][c * 5 + y[idx]] = x[idx]
+            df['y'][c * 5 + y[idx]] = y[idx]
+            counts[y[idx]] += 1
+    return df
+
+
+def get_dataset(ds: List[str], percentages: List[int], val_dataset: str, n_train: int, n_val: int = 100):
+    val_data = get_data(val_dataset, n_val, 0)
+    
+    train_data = defaultdict()
+    train_data['x'] = []
+    train_data['y'] = []
+    for i in enumerate(ds):
+        dataset = ds[i]
+        split = percentages[i]
+        num_samples = (n_train*split)/100
+        df = get_data(dataset, num_samples, 5*n_val)
+        train_data['x'].extend(df['x'])
+        train_data['y'].extend(df['y'])
+
+    return train_data, val_data
+    
+>>>>>>> 870fc25 (adding project code structure)
 def get_model_and_tokenizer(model: str, Cls, **model_kwargs):
     hf_model_name = model2hfname(model)
 
@@ -155,7 +231,10 @@ def get_model_and_tokenizer(model: str, Cls, **model_kwargs):
             tok.pad_token = '[PAD]'
     return m, tok
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 870fc25 (adding project code structure)
 def metric_for_dataset(dataset: str):
     return {
         'cnn': 'rouge',
@@ -173,4 +252,8 @@ def early_stop_thresold(dataset: str):
         'babi': 0.9,
         'amazon': 0.75,
         'xsum': 0.55,
+<<<<<<< HEAD
     }[dataset]
+=======
+    }[dataset]
+>>>>>>> 870fc25 (adding project code structure)
