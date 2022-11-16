@@ -32,10 +32,24 @@ parser.add_argument("--val_dataset")
 parser.add_argument("--mode", default="all")
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
-parser.add_argument("--device", default="cuda")
+parser.add_argument("--device", default="cpu")
 args = parser.parse_args()
 
 DEVICE = torch.device(args.device)
+
+
+def eval(model, tok, val_data):
+    x = tok(
+        val_data["x"],
+        return_tensors="pt",
+        padding=True,
+        truncation=True,
+        max_length=100,
+    ).to(DEVICE)
+    y = torch.tensor(val_data["y"], device=DEVICE)
+    with torch.inference_mode():
+        logits = model(**x).logits
+    return get_acc(logits, y)
 
 
 def parameters_to_fine_tune(model: nn.Module, mode: str) -> List:
@@ -80,7 +94,7 @@ def ft_bert(model, tok, x, y, mode, batch_size=8):
         x, return_tensors="pt", padding=True, truncation=True, max_length=100
     ).to(DEVICE)
     all_y = torch.tensor(y, device=DEVICE)
-    pbar = tqdm.tqdm(range(1000))
+    pbar = tqdm.tqdm(range(1))
     for step in pbar:
         batch = np.random.randint(0, len(x), batch_size)
         x_ = tok(
@@ -110,16 +124,24 @@ def ft_bert(model, tok, x, y, mode, batch_size=8):
 
 def run_ft(
     models: List[str],
-    datasets: List[str],
+    train_datasets: List[str],
+    val_datasets: List[str],
     train_percentages: List[int],
-    test_percentages: List[int],
+    val_percentages: List[int],
     modes: List[str],
     n_train: int = 200,
     n_val: int = 40,
 ):
     results = {}
 
-    train, val = get_dataset(datasets, train_percentages, test_percentages, n_train, n_val)
+    train, val = get_train_val_datasets(
+        train_datasets,
+        val_datasets,
+        train_percentages,
+        val_percentages,
+        n_train,
+        n_val,
+    )
 
     for model_name, mode in itertools.product(models, modes):
         print(f"Fine-tuning {model_name} on and mode={mode}")
@@ -134,7 +156,18 @@ def run_ft(
                 val_acc = eval(fine_tuned, tokenizer, val)
                 results[
                     "_".join(
-                        [model_name, "_".join(datasets), "_".join(percentages), mode]
+                        [
+                            model_name,
+                            "-train",
+                            "_".join(train_datasets),
+                            "-val",
+                            "_".join(val_datasets),
+                            "-train_pct",
+                            "_".join([str(p) for p in train_percentages]),
+                            "-val_pct_",
+                            "_".join([str(p) for p in val_percentages]),
+                            mode,
+                        ]
                     )
                 ] = val_acc
 
@@ -150,13 +183,16 @@ def run_ft(
 
 
 if __name__ == "__main__":
-    # percentages = [int(k) for k in args.percentages.split(",")]
-    percentages = [80, 20]
-    # run_ft(args.model.split(","), args.dataset.split(","), percentages, args.val_dataset, args.mode.split(","))
+    # train_percentages = [int(k) for k in args.percentages.split(",")]
+    # val_percentages = [int(k) for k in args.percentages.split(",")]
+    # run_ft(args.model.split(","), args.train_dataset.split(","), args.val_dataset.split(","), train_percentages, val_percentages, args.mode.split(","))
+    train_percentages = [80, 20]
+    val_percentages = [20, 80]
     run_ft(
         ["bert-med"],
         ["amazon_video", "amazon_books"],
-        percentages,
-        percentages,
+        ["amazon_video", "amazon_books"],
+        train_percentages,
+        val_percentages,
         args.mode.split(","),
     )
