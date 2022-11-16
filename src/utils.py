@@ -68,7 +68,7 @@ def max_sampled_tokens_for_dataset(dataset: str) -> int:
     }[dataset]
 
 
-def get_data(dataset: str, num_samples: int, start_index: int):
+def get_data(dataset: str, num_samples: int):
     d = datasets.load_dataset(dataset2hfname(dataset)[0], dataset2hfname(dataset)[1])[
         "train"
     ]
@@ -79,7 +79,7 @@ def get_data(dataset: str, num_samples: int, start_index: int):
     df = defaultdict(lambda: [None] * 5 * num_samples)
     counts = defaultdict(int)
     end_idx = 0
-    for idx in range(start_index, len(y)):
+    for idx in range( len(y)):
         c = counts[y[idx]]
         if c < num_samples:
             df["x"][c * 5 + y[idx]] = x[idx]
@@ -92,27 +92,32 @@ def get_data(dataset: str, num_samples: int, start_index: int):
 
 def get_dataset(
     ds: List[str],
-    percentages: List[int],
-    val_dataset: str,
+    train_percentages: List[int],
+    val_percentages: List[int],
     n_train: int,
     n_val: int = 100,
 ):
-    val_data, end_idx_val = get_data(val_dataset, n_val, 0)
 
     train_data = defaultdict()
     train_data["x"] = []
     train_data["y"] = []
+    val_data = defaultdict()
+    val_data["x"] = []
+    val_data["y"] = []
     for i, d in enumerate(ds):
         dataset = d
-        split = percentages[i]
-        num_samples = int((n_train * split) / 100)
+        train_split = train_percentages[i]
+        val_split = val_percentages[i]
+        train_samples = int((n_train * train_split) / 100)
+        val_samples = int((n_val * val_split) / 100)
         df, _ = get_data(
             dataset,
-            num_samples,
-            start_index=end_idx_val if dataset == val_dataset else 0,
+            train_samples,
         )
-        train_data["x"].extend(df["x"])
-        train_data["y"].extend(df["y"])
+        train_data["x"].extend(df["x"][:5*train_samples])
+        train_data["y"].extend(df["y"][:5*train_samples])
+        val_data["x"].extend(df["x"][5*train_samples:])
+        val_data["y"].extend(df["y"][5*train_samples:])
 
     return train_data, val_data
 

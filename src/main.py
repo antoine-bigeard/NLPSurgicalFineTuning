@@ -111,15 +111,15 @@ def ft_bert(model, tok, x, y, mode, batch_size=8):
 def run_ft(
     models: List[str],
     datasets: List[str],
-    percentages: List[int],
-    val_dataset: str,
+    train_percentages: List[int],
+    test_percentages: List[int],
     modes: List[str],
     n_train: int = 200,
     n_val: int = 40,
 ):
     results = {}
 
-    train, val = get_dataset(datasets, percentages, val_dataset, n_train, n_val)
+    train, val = get_dataset(datasets, train_percentages, test_percentages, n_train, n_val)
 
     for model_name, mode in itertools.product(models, modes):
         print(f"Fine-tuning {model_name} on and mode={mode}")
@@ -157,6 +157,6 @@ if __name__ == "__main__":
         ["bert-med"],
         ["amazon_video", "amazon_books"],
         percentages,
-        "amazon_video",
+        percentages,
         args.mode.split(","),
     )
