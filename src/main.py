@@ -181,6 +181,7 @@ def run_ft(
             question = "ft"
             if not os.path.exists(f"results/{question}"):
                 os.makedirs(f"results/{question}")
+
             path_ckpt = f"results/ft/fine_tuned_{description_str}.pt"
             torch.save(
                 {"model_state_dict": fine_tuned.state_dict()},
@@ -204,7 +205,7 @@ if __name__ == "__main__":
     # run_ft(
     #     ["bert-med"],
     #     ["amazon_electronics", "amazon_video"],
-    #     ["amazon_electronics", "amazon_video"],
+    #     ["amazon_electronics", "amazon_video"],   
     #     train_percentages,
     #     val_percentages,
     #     args.mode.split(","),
