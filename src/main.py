@@ -30,6 +30,10 @@ parser.add_argument("--dataset")
 parser.add_argument("--percentages")
 parser.add_argument("--val_dataset")
 parser.add_argument("--mode", default="all")
+parser.add_argument(
+    "--path_ckpt",
+    default="results/ft/fine_tuned_bert-med_-train_amazon_video_amazon_books_-val_amazon_video_amazon_books_-train_pct_80_20_-val_pct__20_80_all.pt",
+)
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
 parser.add_argument("--device", default="cpu")
@@ -150,28 +154,36 @@ def run_ft(
         )
 
         for repeat in range(args.repeats):
-            if repeat >= 0:
-                print(f"Beginning repeat #{repeat}")
-                fine_tuned = ft_bert(model, tokenizer, train["x"], train["y"], mode)
-                val_acc = eval(fine_tuned, tokenizer, val)
-                results[
-                    "_".join(
-                        [
-                            model_name,
-                            "-train",
-                            "_".join(train_datasets),
-                            "-val",
-                            "_".join(val_datasets),
-                            "-train_pct",
-                            "_".join([str(p) for p in train_percentages]),
-                            "-val_pct_",
-                            "_".join([str(p) for p in val_percentages]),
-                            mode,
-                        ]
-                    )
-                ] = val_acc
+            print(f"Beginning repeat #{repeat}")
+            if args.path_ckpt is not None:
+                ckpt = torch.load(args.path_ckpt)
+                model.load_state_dict(ckpt["model_state_dict"])
+            fine_tuned = ft_bert(model, tokenizer, train["x"], train["y"], mode)
+            val_acc = eval(fine_tuned, tokenizer, val)
+            dectription_str = "_".join(
+                [
+                    model_name,
+                    "-train",
+                    "_".join(train_datasets),
+                    "-val",
+                    "_".join(val_datasets),
+                    "-train_pct",
+                    "_".join([str(p) for p in train_percentages]),
+                    "-val_pct_",
+                    "_".join([str(p) for p in val_percentages]),
+                    mode,
+                ]
+            )
+            results[dectription_str] = val_acc
+
+            path_ckpt = f"results/ft/fine_tuned_{dectription_str}.pt"
+            torch.save(
+                {"model_state_dict": fine_tuned.state_dict()},
+                path_ckpt,
+            )
 
             print(results)
+
             question = "ft"
             if not os.path.exists(f"results/{question}"):
                 os.makedirs(f"results/{question}")
