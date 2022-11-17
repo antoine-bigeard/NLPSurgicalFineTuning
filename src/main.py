@@ -11,7 +11,7 @@ import sys
 
 sys.path.insert(0, ".")
 
-from src.utils import *
+from utils import *
 
 import argparse
 import copy
@@ -27,12 +27,14 @@ import yaml
 parser = argparse.ArgumentParser()
 parser.add_argument("--model")
 parser.add_argument("--dataset")
-parser.add_argument("--percentages")
-parser.add_argument("--val_dataset")
+parser.add_argument("--train_percentages", default = "100")
+parser.add_argument("--val_percentages", default = "100")
+parser.add_argument("--train_dataset", default = "amazon_electronics")
+parser.add_argument("--val_dataset", default = "amazon_electronics")
 parser.add_argument("--mode", default="all")
 parser.add_argument(
     "--path_ckpt",
-    default="results/ft/fine_tuned_bert-med_-train_amazon_video_amazon_books_-val_amazon_video_amazon_books_-train_pct_80_20_-val_pct__20_80_all.pt",
+    # default="results/ft/fine_tuned_bert-med_-train_amazon_video_amazon_books_-val_amazon_video_amazon_books_-train_pct_80_20_-val_pct__20_80_all.pt",
 )
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
@@ -69,7 +71,6 @@ def parameters_to_fine_tune(model: nn.Module, mode: str) -> List:
       A list of nn.Parameters of `model` that should be fine-tuned in the given
         fine-tuning mode.
     """
-    # YOUR CODE HERE
     if mode == "all":
         params = [p for p in model.parameters() if p.requires_grad]
         return params
@@ -160,33 +161,33 @@ def run_ft(
                 model.load_state_dict(ckpt["model_state_dict"])
             fine_tuned = ft_bert(model, tokenizer, train["x"], train["y"], mode)
             val_acc = eval(fine_tuned, tokenizer, val)
-            dectription_str = "_".join(
+            description_str = "_".join(
                 [
                     model_name,
-                    "-train",
-                    "_".join(train_datasets),
-                    "-val",
-                    "_".join(val_datasets),
-                    "-train_pct",
-                    "_".join([str(p) for p in train_percentages]),
-                    "-val_pct_",
-                    "_".join([str(p) for p in val_percentages]),
+                    "train",
+                    "-".join(train_datasets),
+                    "val",
+                    "-".join(val_datasets),
+                    "train_pct",
+                    "-".join([str(p) for p in train_percentages]),
+                    "val_pct",
+                    "-".join([str(p) for p in val_percentages]),
                     mode,
                 ]
             )
-            results[dectription_str] = val_acc
+            results[description_str] = val_acc
 
-            path_ckpt = f"results/ft/fine_tuned_{dectription_str}.pt"
+
+            question = "ft"
+            if not os.path.exists(f"results/{question}"):
+                os.makedirs(f"results/{question}")
+            path_ckpt = f"results/ft/fine_tuned_{description_str}.pt"
             torch.save(
                 {"model_state_dict": fine_tuned.state_dict()},
                 path_ckpt,
             )
 
             print(results)
-
-            question = "ft"
-            if not os.path.exists(f"results/{question}"):
-                os.makedirs(f"results/{question}")
 
             for k_, v in results.items():
                 with open(f"results/{question}/{k_}.json", "w") as f:
@@ -195,16 +196,16 @@ def run_ft(
 
 
 if __name__ == "__main__":
-    # train_percentages = [int(k) for k in args.percentages.split(",")]
-    # val_percentages = [int(k) for k in args.percentages.split(",")]
-    # run_ft(args.model.split(","), args.train_dataset.split(","), args.val_dataset.split(","), train_percentages, val_percentages, args.mode.split(","))
-    train_percentages = [80, 20]
-    val_percentages = [20, 80]
-    run_ft(
-        ["bert-med"],
-        ["amazon_video", "amazon_books"],
-        ["amazon_video", "amazon_books"],
-        train_percentages,
-        val_percentages,
-        args.mode.split(","),
-    )
+    train_percentages = [int(k) for k in args.train_percentages.split(",")]
+    val_percentages = [int(k) for k in args.val_percentages.split(",")]
+    run_ft(args.model.split(","), args.train_dataset.split(","), args.val_dataset.split(","), train_percentages, val_percentages, args.mode.split(","))
+    # train_percentages = [100, 0]
+    # val_percentages = [100, 0]
+    # run_ft(
+    #     ["bert-med"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     train_percentages,
+    #     val_percentages,
+    #     args.mode.split(","),
+    # )

@@ -22,15 +22,6 @@ def model2hfname(model: str) -> str:
     return {
         "bert-tiny": "prajjwal1/bert-tiny",
         "bert-med": "prajjwal1/bert-medium",
-        "small": "gpt2",
-        "med": "gpt2-medium",
-        "large": "gpt2-large",
-        "full": "gpt2-xl",
-        "gpt2-sm": "gpt2",
-        "gpt2-med": "gpt2-medium",
-        "gpt2-lg": "gpt2-large",
-        "gpt2": "gpt2-xl",
-        "neo": "EleutherAI/gpt-neo-2.7B",
     }[model]
 
 
@@ -39,16 +30,10 @@ def dataset2hfname(dataset: str) -> str:
         "mnli": ("multi_nli",),
         "amazon_video": ("amazon_us_reviews", "Video_v1_00"),
         "amazon_books": ("amazon_us_reviews", "Books_v1_00"),
-        "cnn": ("cnn_dailymail", "3.0.0"),
-        "math": ("math_qa",),
-        "tos": ("ought/raft", "terms_of_service"),
-        "xsum": ("xsum",),
-        "babi": ("babi_qa", "en-valid-10k-qa1"),
+        "amazon_electronics": ("amazon_us_reviews", "Mobile_Electronics_v1_00"),
+        "tweet_eval": ("tweet_eval", "hate"),
+        "civil_comments": ("civil_comments",),
     }[dataset]
-
-
-def is_qa_dataset(dataset: str) -> bool:
-    return dataset in ["trivia", "babi"]
 
 
 def stop_tokens(tokenizer, stop_string: str = ".") -> int:
@@ -59,14 +44,6 @@ def stop_tokens(tokenizer, stop_string: str = ".") -> int:
     return tokens
 
 
-def max_sampled_tokens_for_dataset(dataset: str) -> int:
-    return {
-        "cnn": 30,
-        "trivia": 12,
-        "babi": 6,
-        "xsum": 30,
-    }[dataset]
-
 
 def get_data(dataset: str, num_samples: int):
     d = datasets.load_dataset(dataset2hfname(dataset)[0], dataset2hfname(dataset)[1])[
@@ -88,29 +65,6 @@ def get_data(dataset: str, num_samples: int):
             end_idx += 1
 
     return df, end_idx
-
-
-def get_data(dataset: str, num_samples: int):
-    d = datasets.load_dataset(dataset2hfname(dataset)[0], dataset2hfname(dataset)[1])[
-        "train"
-    ]
-    filter_fn = lambda rows: ["sex" not in r.lower() for r in rows["review_body"]]
-    d = d.filter(filter_fn, batched=True, batch_size=None)
-    x = d["review_body"]
-    y = [s - 1 for s in d["star_rating"]]
-    df = defaultdict(lambda: [None] * 5 * num_samples)
-    counts = defaultdict(int)
-    end_idx = 0
-    for idx in range(len(y)):
-        c = counts[y[idx]]
-        if c < num_samples:
-            df["x"][c * 5 + y[idx]] = x[idx]
-            df["y"][c * 5 + y[idx]] = y[idx]
-            counts[y[idx]] += 1
-            end_idx += 1
-
-    return df, end_idx
-
 
 # def get_dataset(
 #     ds: List[str],
@@ -334,20 +288,19 @@ def get_model_and_tokenizer(model: str, Cls, **model_kwargs):
 
 def metric_for_dataset(dataset: str):
     return {
-        "cnn": "rouge",
-        "xsum": "rouge",
-        "trivia": "exact match",
-        "babi": "exact match",
+        "mnli": "classification accuracy",
         "amazon_books": "classification accuracy",
         "amazon_video": "classification accuracy",
+        "tweet_eval": "classification accuracy",
+        "civil_comments": "classification accuracy",
     }[dataset]
 
 
 def early_stop_thresold(dataset: str):
     return {
-        "cnn": 0.8,
-        "trivia": 0.7,
-        "babi": 0.9,
-        "amazon": 0.75,
-        "xsum": 0.55,
+        "mnli": 0.95,
+        "amazon_books": 0.95,
+        "amazon_video": 0.95,
+        "tweet_eval": 0.95,
+        "civil_comments": 0.95,
     }[dataset]
