@@ -99,16 +99,16 @@ def get_acc(logits, targets):
     return torch.mean(y).item()
 
 
-def ft_bert(model, tok, x, y, mode, nbr_batch=10000, batch_size=8):
+def ft_bert(model, tok, x, y, mode, nbr_batch=10000, batch_size=196, saving_path = ""):
     model = copy.deepcopy(model)
 
     model.to(DEVICE)
 
     optimizer = torch.optim.Adam(parameters_to_fine_tune(model, mode), lr=1e-4)
     all_x = tok(
-        x, return_tensors="pt", padding=True, truncation=True, max_length=100
+        x[:100], return_tensors="pt", padding=True, truncation=True, max_length=100
     ).to(DEVICE)
-    all_y = torch.tensor(y, device=DEVICE)
+    all_y = torch.tensor(y[:100], device=DEVICE)
     pbar = tqdm.tqdm(range(nbr_batch))
     for step in pbar:
         batch = np.random.randint(0, len(x), batch_size)
@@ -132,8 +132,13 @@ def ft_bert(model, tok, x, y, mode, nbr_batch=10000, batch_size=8):
             with torch.inference_mode():
                 total_acc = get_acc(model(**all_x).logits, all_y)
             pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
-            # if total_acc > 0.75:
-            #     break
+        if step % 500 == 0 and saving_path != "":
+            torch.save(
+                    {"model_state_dict": model.state_dict()},
+                    saving_path + "_total_acc_" + str(round(total_acc,2)) + f"_step_{step}.pt",
+                )
+
+
     return model
 
 
@@ -145,19 +150,11 @@ def run_ft(
     val_percentages,
     modes,
     nbr_batch,
-    n_train: int = 200,
-    n_val: int = 40,
+    n_train: int = 5000,
+    n_val: int = 200,
 ):
     results = {}
 
-    train, val = get_train_val_datasets(
-        train_datasets,
-        val_datasets,
-        train_percentages,
-        val_percentages,
-        n_train,
-        n_val,
-    )
 
     for model_name, mode in itertools.product(models, modes):
         print(f"Fine-tuning {model_name} on and mode={mode}")
@@ -166,18 +163,14 @@ def run_ft(
         )
 
         for repeat in range(args.repeats):
-            print(f"Beginning repeat #{repeat}")
-            if args.path_ckpt is not None:
-                ckpt = torch.load(args.path_ckpt)
-                model.load_state_dict(ckpt["model_state_dict"])
-
-            if args.eval_only == 0:
-                fine_tuned = ft_bert(
-                    model, tokenizer, train["x"], train["y"], mode, nbr_batch
-                )
-                val_acc = eval(fine_tuned, tokenizer, val)
-            else:
-                val_acc = eval(model, tokenizer, val)
+            train, val = get_train_val_datasets(
+                train_datasets,
+                val_datasets,
+                train_percentages,
+                val_percentages,
+                n_train,
+                n_val,
+            )
 
             eval_only_str = (args.eval_only == 0) * "finetune_and_eval" + (
                 args.eval_only == 1
@@ -197,6 +190,25 @@ def run_ft(
                     eval_only_str,
                 ]
             )
+            path_ckpt = f"results/ft/fine_tuned_{description_str}.pt"
+
+
+            print(f"Beginning repeat #{repeat}")
+            if args.path_ckpt is not None:
+                ckpt = torch.load(args.path_ckpt)
+                model.load_state_dict(ckpt["model_state_dict"])
+            
+            if repeat > 0:
+                model = fine_tuned
+                
+            if args.eval_only == 0:
+                fine_tuned = ft_bert(
+                    model, tokenizer, train["x"], train["y"], mode, nbr_batch, saving_path=path_ckpt[:-3]
+                )
+                val_acc = eval(fine_tuned, tokenizer, val)
+            else:
+                val_acc = eval(model, tokenizer, val)
+
             results[description_str] = val_acc
 
             question = "ft"
@@ -204,7 +216,6 @@ def run_ft(
                 os.makedirs(f"results/{question}")
 
             if args.eval_only == 0:
-                path_ckpt = f"results/ft/fine_tuned_{description_str}.pt"
                 torch.save(
                     {"model_state_dict": fine_tuned.state_dict()},
                     path_ckpt,

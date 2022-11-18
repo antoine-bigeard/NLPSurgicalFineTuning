@@ -54,10 +54,11 @@ def stop_tokens(tokenizer, stop_string: str = ".") -> int:
 def get_data(dataset: str, num_samples: int):
     if "amazon" in dataset:
         d = datasets.load_dataset(dataset2hfname(dataset)[0], dataset2hfname(dataset)[1])[
-            "train"
+            'train'
         ]
         filter_fn = lambda rows: ["sex" not in r.lower() for r in rows["review_body"]]
         d = d.filter(filter_fn, batched=True, batch_size=None)
+        d = d.shuffle()
         x = d["review_body"]
         y = [s - 1 for s in d["star_rating"]]
         df = defaultdict(lambda: [None] * 5 * num_samples)
@@ -75,30 +76,6 @@ def get_data(dataset: str, num_samples: int):
 
     else: ## To be filled with the logic to extract other datasets
         raise NotImplementedError()
-
-"""TO UPDATE FOR NEXT PUSH
-"""
-# def get_single_dataset_train_val(
-#     ds: str,
-#     train_pct: List[int],
-#     val_pct: List[int],
-#     n_train: int,
-#     n_val: int = 100,
-# ):
-
-#     train_data = defaultdict()
-#     val_data = defaultdict()
-
-#     train_samples = int((n_train * train_pct) / 100)
-#     val_samples = int((n_val * val_pct) / 100)
-#     df_train, _ = get_data(ds, train_samples, mode="train")
-#     df_val, _ = get_data(ds, val_samples, mode="val")
-#     train_data["x"] = df_train["x"][: 5 * train_samples]
-#     train_data["y"] = df_train["y"][: 5 * train_samples]
-#     val_data["x"] = df_val["x"][5 * val_samples]
-#     val_data["y"] = df_val["y"][5 * val_samples]
-
-#     return train_data, val_data
 
 
 def get_single_dataset(
@@ -124,6 +101,7 @@ def get_single_dataset(
     val_data["y"] = df["y"][5 * train_samples : 5 * (train_samples + val_samples)]
 
     return train_data, val_data
+
 
 
 def get_train_val_pcts(
@@ -191,24 +169,6 @@ def get_model_and_tokenizer(model: str, Cls, **model_kwargs):
     return m, tok
 
 
-def metric_for_dataset(dataset: str):
-    return {
-        "mnli": "classification accuracy",
-        "amazon_books": "classification accuracy",
-        "amazon_video": "classification accuracy",
-        "tweet_eval": "classification accuracy",
-        "civil_comments": "classification accuracy",
-    }[dataset]
-
-
-def early_stop_thresold(dataset: str):
-    return {
-        "mnli": 0.95,
-        "amazon_books": 0.95,
-        "amazon_video": 0.95,
-        "tweet_eval": 0.95,
-        "civil_comments": 0.95,
-    }[dataset]
 
 
 
@@ -225,9 +185,19 @@ def early_stop_thresold(dataset: str):
 
 
 
+## GRAVEYARD
 
 
+# def metric_for_dataset(dataset: str):
+#     return {
+#         "mnli": "classification accuracy",
+#     }[dataset]
 
+
+# def early_stop_thresold(dataset: str):
+#     return {
+#         "mnli": 0.95,
+#     }[dataset]
 
 # def get_dataset(
 #     ds: List[str],
