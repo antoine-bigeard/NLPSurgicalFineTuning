@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 from typing import List
 from collections import defaultdict
+from cleantext import clean
+
 
 logging.basicConfig()
 LOG = logging.getLogger(__name__)
@@ -37,7 +39,7 @@ def dataset2hfname(dataset: str) -> str:
         "amazon_luggage": ("amazon_us_reviews", "Luggage_v1_00"),
         
 
-        "tweet_eval": ("tweet_eval", "hate"),
+        "tweet_eval": ("tweet_eval", "offensive"),
         "civil_comments": ("civil_comments",),
     }[dataset]
 
@@ -50,15 +52,13 @@ def stop_tokens(tokenizer, stop_string: str = ".") -> int:
     return tokens
 
 
-
 def get_data(dataset: str, num_samples: int):
     if "amazon" in dataset:
         d = datasets.load_dataset(dataset2hfname(dataset)[0], dataset2hfname(dataset)[1])[
-            'train'
+            "train"
         ]
         filter_fn = lambda rows: ["sex" not in r.lower() for r in rows["review_body"]]
         d = d.filter(filter_fn, batched=True, batch_size=None)
-        d = d.shuffle()
         x = d["review_body"]
         y = [s - 1 for s in d["star_rating"]]
         df = defaultdict(lambda: [None] * 5 * num_samples)
@@ -72,16 +72,117 @@ def get_data(dataset: str, num_samples: int):
                 counts[y[idx]] += 1
                 end_idx += 1
 
+        # filter3 = lambda rows: [r is not None and len(r)>0 for r in df["x"]]
+        # filter4 = lambda rows: [r is not None and r in [0,1] for r in df["y"]]
+        # df = df.filter(filter3, batched=True, batch_size=None)
+        # df = df.filter(filter4, batched=True, batch_size=None)
+
+        return df, end_idx
+    elif dataset == "tweet_eval":
+        d = datasets.load_dataset(dataset2hfname(dataset)[0], dataset2hfname(dataset)[1])[
+            "train"
+        ]
+        filter1 = lambda rows: [r is not None and len(r)>0 for r in rows["text"]]
+        filter2 = lambda rows: [r is not None and r in [0,1] for r in rows["label"]]
+        # filter_fn = lambda rows: [clean(r, no_emoji=True) for r in rows["text"]]
+        d = d.filter(filter1, batched=True, batch_size=None)
+        d = d.filter(filter2, batched=True, batch_size=None)
+        x = [r for r in d["text"]]
+        y = [int(r) for r in d["label"]]
+
+        # print("tweet_eval")
+        # print(len(x))
+        # print(len(y))
+
+        df = defaultdict(lambda: [None] * 2 * num_samples)
+        counts = defaultdict(int)
+        end_idx = 0
+        for idx in range(len(y)):
+            c = counts[y[idx]]
+            if c < num_samples:
+                df["x"][c * 2 + y[idx]] = x[idx]
+                df["y"][c * 2 + y[idx]] = y[idx]
+                # print(df["x"][c * 2 + y[idx]], df["y"][c * 2 + y[idx]])
+                counts[y[idx]] += 1
+                end_idx += 1
+
+        # filter3 = lambda rows: [r is not None and len(r)>0 for r in df["x"]]
+        # filter4 = lambda rows: [r is not None and r in [0,1] for r in df["y"]]
+        # df = df.filter(filter3, batched=True, batch_size=None)
+        # df = df.filter(filter4, batched=True, batch_size=None)
+        
+
+        return df, end_idx
+    elif dataset == "civil_comments":
+        d = datasets.load_dataset(dataset2hfname(dataset)[0])[
+            "train"
+        ]
+        filter1 = lambda rows: [r is not None and len(r)>0 for r in rows["text"]]
+        filter2 = lambda rows: [r is not None and r>=0.0 for r in rows["toxicity"]]
+        # filter_fn = lambda rows: [clean(r, no_emoji=True) for r in rows["text"]]
+        d = d.filter(filter1, batched=True, batch_size=None)
+        d = d.filter(filter2, batched=True, batch_size=None)
+        # d = d.filter(filter_fn, batched=True, batch_size=None)
+        x = [r for r in d["text"]]
+        y = [int(0) if r<=0.5 else int(1) for r in d["toxicity"]]
+
+        df = defaultdict(lambda: [None] * 2 * num_samples)
+        counts = defaultdict(int)
+        end_idx = 0
+        for idx in range(len(y)):
+            c = counts[y[idx]]
+            if c < num_samples:
+                df["x"][c * 2 + y[idx]] = x[idx]
+                df["y"][c * 2 + y[idx]] = y[idx]
+                # print(df["x"][c * 2 + y[idx]], df["y"][c * 2 + y[idx]])
+                counts[y[idx]] += 1
+                end_idx += 1
+
+        # print("civil_comments")
+        # print(len(x))
+        # print(len(y))
+
+        # filter3 = lambda rows: [r is not None and len(r)>0 for r in df["x"]]
+        # filter4 = lambda rows: [r is not None and r in [0,1] for r in df["y"]]
+        # df = df.filter(filter3, batched=True, batch_size=None)
+        # df = df.filter(filter4, batched=True, batch_size=None)
+
+
         return df, end_idx
 
     else: ## To be filled with the logic to extract other datasets
         raise NotImplementedError()
+
+"""TO UPDATE FOR NEXT PUSH
+"""
+# def get_single_dataset_train_val(
+#     ds: str,
+#     train_pct: List[int],
+#     val_pct: List[int],
+#     n_train: int,
+#     n_val: int = 100,
+# ):
+
+#     train_data = defaultdict()
+#     val_data = defaultdict()
+
+#     train_samples = int((n_train * train_pct) / 100)
+#     val_samples = int((n_val * val_pct) / 100)
+#     df_train, _ = get_data(ds, train_samples, mode="train")
+#     df_val, _ = get_data(ds, val_samples, mode="val")
+#     train_data["x"] = df_train["x"][: 5 * train_samples]
+#     train_data["y"] = df_train["y"][: 5 * train_samples]
+#     val_data["x"] = df_val["x"][5 * val_samples]
+#     val_data["y"] = df_val["y"][5 * val_samples]
+
+#     return train_data, val_data
 
 
 def get_single_dataset(
     ds: str,
     train_pct: List[int],
     val_pct: List[int],
+    n_classes: int,
     n_train: int,
     n_val: int = 100,
 ):
@@ -95,13 +196,12 @@ def get_single_dataset(
         ds,
         train_samples + val_samples,
     )
-    train_data["x"] = df["x"][: 5 * train_samples]
-    train_data["y"] = df["y"][: 5 * train_samples]
-    val_data["x"] = df["x"][5 * train_samples : 5 * (train_samples + val_samples)]
-    val_data["y"] = df["y"][5 * train_samples : 5 * (train_samples + val_samples)]
+    train_data["x"] = df["x"][: n_classes * train_samples]
+    train_data["y"] = df["y"][: n_classes * train_samples]
+    val_data["x"] = df["x"][n_classes * train_samples :]
+    val_data["y"] = df["y"][n_classes * train_samples :]
 
     return train_data, val_data
-
 
 
 def get_train_val_pcts(
@@ -135,10 +235,12 @@ def get_train_val_datasets(
     train_data = {"x": [], "y": []}
     val_data = {"x": [], "y": []}
     for ds in set(train_datasets + val_datasets):
+        n_classes = 5 if "amazon" in ds else 2
         temp_train, temp_val = get_single_dataset(
             ds,
             train_val_pcts[ds]["train"],
             train_val_pcts[ds]["val"],
+            n_classes,
             n_train,
             n_val,
         )
@@ -146,8 +248,9 @@ def get_train_val_datasets(
         train_data["y"].extend(temp_train["y"])
         val_data["x"].extend(temp_val["x"])
         val_data["y"].extend(temp_val["y"])
-
+    
     return train_data, val_data
+
 
 
 def get_model_and_tokenizer(model: str, Cls, **model_kwargs):
@@ -331,3 +434,21 @@ def get_model_and_tokenizer(model: str, Cls, **model_kwargs):
 
 
 
+def metric_for_dataset(dataset: str):
+    return {
+        "mnli": "classification accuracy",
+        "amazon_books": "classification accuracy",
+        "amazon_video": "classification accuracy",
+        "tweet_eval": "classification accuracy",
+        "civil_comments": "classification accuracy",
+    }[dataset]
+
+
+def early_stop_thresold(dataset: str):
+    return {
+        "mnli": 0.95,
+        "amazon_books": 0.95,
+        "amazon_video": 0.95,
+        "tweet_eval": 0.95,
+        "civil_comments": 0.95,
+    }[dataset]

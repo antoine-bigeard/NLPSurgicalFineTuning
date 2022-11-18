@@ -11,7 +11,7 @@ import sys
 
 sys.path.insert(0, ".")
 
-from src.utils import *
+from utils import *
 
 import argparse
 import copy
@@ -20,6 +20,7 @@ import itertools
 import json
 import torch
 import torch.nn as nn
+from torch.utils.data import DataLoader
 import transformers
 import tqdm
 import yaml
@@ -39,24 +40,12 @@ parser.add_argument("--repeats", default=1, type=int)
 parser.add_argument("--nbr_batch", default=1000, type=int)
 parser.add_argument("--device", default="cpu")
 parser.add_argument("--eval_only", default=0, type=int)
+parser.add_argument("--n_train", default=1000, type=int)
+parser.add_argument("--n_val", default=100, type=int)
 args = parser.parse_args()
 
 
 DEVICE = torch.device(args.device)
-
-
-def eval(model, tok, val_data):
-    x = tok(
-        val_data["x"],
-        return_tensors="pt",
-        padding=True,
-        truncation=True,
-        max_length=100,
-    ).to(DEVICE)
-    y = torch.tensor(val_data["y"], device=DEVICE)
-    with torch.inference_mode():
-        logits = model(**x).logits
-    return get_acc(logits, y)
 
 
 def parameters_to_fine_tune(model: nn.Module, mode: str):
@@ -98,28 +87,67 @@ def get_acc(logits, targets):
     y = y.type(torch.float)
     return torch.mean(y).item()
 
+def eval(model, tok, val_data):
+    # print("Validation")
+    # print(len(val_data["x"]))
+    eval_dataloader = DataLoader(list(zip(val_data["x"], val_data["y"])), batch_size=8, shuffle=True, collate_fn=None)
 
-def ft_bert(model, tok, x, y, mode, val, nbr_batch=5000, batch_size=32, saving_path = ""):
-    model = copy.deepcopy(model)
-
-    model.to(DEVICE)
-
-    optimizer = torch.optim.Adam(parameters_to_fine_tune(model, mode), lr=1e-4)
-    all_x = tok(
-        x[:100], return_tensors="pt", padding=True, truncation=True, max_length=100
-    ).to(DEVICE)
-    all_y = torch.tensor(y[:100], device=DEVICE)
-    pbar = tqdm.tqdm(range(nbr_batch))
-    for step in pbar:
-        batch = np.random.randint(0, len(x), batch_size)
+    pbar = tqdm.tqdm(enumerate(eval_dataloader))
+    accuracies = []
+    for step, data in pbar:
+        x, y = data
+        # x, y = zip(*data)
         x_ = tok(
-            [x[i] for i in batch],
+            list(x),
             return_tensors="pt",
             padding=True,
             truncation=True,
             max_length=100,
         ).to(DEVICE)
-        y_ = torch.tensor([y[i] for i in batch], device=DEVICE)
+        y_ = torch.tensor(y, device=DEVICE)
+        with torch.inference_mode():
+            total_acc = get_acc(model(**x_).logits, y_)
+            accuracies.append(total_acc)
+
+    return np.mean(accuracies)
+
+def ft_bert(model, tok, x, y, mode, nbr_batch=5000, batch_size=32, saving_path = ""):
+    model = copy.deepcopy(model)
+
+    model.to(DEVICE)
+
+    train_dataloader = DataLoader(list(zip(x, y)), batch_size=8, shuffle=True, collate_fn=None)
+    eval_dataloader = DataLoader(list(zip(x, y)), batch_size=8, shuffle=True, collate_fn=None)
+
+    optimizer = torch.optim.Adam(parameters_to_fine_tune(model, mode), lr=1e-4)
+    # all_x = tok(
+    #     train["x"], return_tensors="pt", padding=True, truncation=True, max_length=100
+    # ).to(DEVICE)
+    # all_y = torch.tensor(train["y"], device=DEVICE)
+    pbar = tqdm.tqdm(enumerate(train_dataloader))
+    for step, data in pbar:
+        # batch = np.random.randint(0, len(x), batch_size)
+        # x_ = tok(
+        #     [x[i] for i in batch],
+        #     return_tensors="pt",
+        #     padding=True,
+        #     truncation=True,
+        #     max_length=100,
+        # ).to(DEVICE)
+        # y_ = torch.tensor([y[i] for i in batch], device=DEVICE)
+
+        x, y = data
+        # print(x)
+        # print(y)
+        # print(x)
+        x_ = tok(
+            list(x),
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=100,
+        ).to(DEVICE)
+        y_ = torch.tensor(y, device=DEVICE)
         logits = model(**x_).logits
         loss = get_loss(logits, y_)
         loss.backward()
@@ -128,56 +156,63 @@ def ft_bert(model, tok, x, y, mode, val, nbr_batch=5000, batch_size=32, saving_p
         if args.debug:
             break
 
-        if step % 10 == 0:
-            with torch.inference_mode():
-                total_acc = get_acc(model(**all_x).logits, all_y)
-            pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
-        if step % 500 == 0 and saving_path != "":
-            val_acc = eval(model, tok, val)
-            print(f"\n Validation accuracy: {val_acc}")
-            torch.save(
-                    {"model_state_dict": model.state_dict()},
-                    saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
-                )
+        # if step % 10 == 0:
+        #     with torch.inference_mode():
+        #         total_acc = get_acc(model(**all_x).logits, all_y)
+        #     pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
+        # if step % 500 == 0 and saving_path != "":
+        #     val_acc = eval(model, tok, val)
+        #     print(f"\n Validation accuracy: {val_acc}")
+            # torch.save(
+            #         {"model_state_dict": model.state_dict()},
+            #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
+            #     )
 
 
     return model
 
 
 def run_ft(
-    models,
-    train_datasets,
-    val_datasets,
-    train_percentages,
-    val_percentages,
-    modes,
+    models: List[str],
+    train_datasets: List[str],
+    val_datasets: List[str],
+    train_percentages: List[int],
+    test_percentages: List[int],
+    modes: List[str],
     nbr_batch,
-    n_train: int = 7000,
-    n_val: int = 200,
+    n_train: int = 1000,
+    n_val: int = 100,
 ):
     results = {}
 
+    train, val = get_train_val_datasets(
+        train_datasets,
+        val_datasets,
+        train_percentages,
+        val_percentages,
+        n_train,
+        n_val,
+    )
 
     for model_name, mode in itertools.product(models, modes):
         print(f"Fine-tuning {model_name} on and mode={mode}")
-        model, tokenizer = get_model_and_tokenizer(
-            model_name, transformers.AutoModelForSequenceClassification, num_labels=5
-        )
 
-        for repeat in range(args.repeats):
-            train, val = get_train_val_datasets(
-                train_datasets,
-                val_datasets,
-                train_percentages,
-                val_percentages,
-                n_train,
-                n_val,
+        model = None
+        tokenizer = None
+        if("amazon" in train_datasets[0]):
+            model, tokenizer = get_model_and_tokenizer(
+                model_name, transformers.AutoModelForSequenceClassification, num_labels=5
+            )
+        else:
+            model, tokenizer = get_model_and_tokenizer(
+                model_name, transformers.AutoModelForSequenceClassification, num_labels=2
             )
 
-            eval_only_str = (args.eval_only == 0) * "finetune_and_eval" + (
+        eval_only_str = (args.eval_only == 0) * "finetune_and_eval" + (
                 args.eval_only == 1
             ) * "eval_only"
-            description_str = "_".join(
+
+        description_str = "_".join(
                 [
                     model_name,
                     "train",
@@ -192,6 +227,11 @@ def run_ft(
                     eval_only_str,
                 ]
             )
+
+        print(f"Begin training for {description_str}")
+
+        for repeat in range(args.repeats):
+
             path_ckpt = f"results/ft/fine_tuned_{description_str}.pt"
 
 
@@ -242,4 +282,6 @@ if __name__ == "__main__":
         val_percentages,
         args.mode.split(","),
         args.nbr_batch,
+        args.n_train,
+        args.n_val
     )

@@ -1,0 +1,256 @@
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments_val_civil_comments_train_pct_100_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments_train_pct_100_val_pct_100_all_finetune_and_eval': 0.855}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments_val_civil_comments_train_pct_100_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments_train_pct_100_val_pct_100_last_finetune_and_eval': 0.81}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments_val_civil_comments_train_pct_100_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments_train_pct_100_val_pct_100_first_finetune_and_eval': 0.83}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments_val_civil_comments_train_pct_100_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments_train_pct_100_val_pct_100_middle_finetune_and_eval': 0.81}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_80-20_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_80-20_all_finetune_and_eval': 0.775}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_80-20_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_80-20_last_finetune_and_eval': 0.795}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_80-20_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_80-20_first_finetune_and_eval': 0.81}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_80-20_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_80-20_middle_finetune_and_eval': 0.8}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_60-40_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_60-40_all_finetune_and_eval': 0.79}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_60-40_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_60-40_last_finetune_and_eval': 0.81}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_60-40_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_60-40_first_finetune_and_eval': 0.79}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_60-40_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_60-40_middle_finetune_and_eval': 0.79}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_40-60_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_40-60_all_finetune_and_eval': 0.82}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_40-60_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_40-60_last_finetune_and_eval': 0.805}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_40-60_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_40-60_first_finetune_and_eval': 0.825}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_40-60_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_40-60_middle_finetune_and_eval': 0.795}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_20-80_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_20-80_all_finetune_and_eval': 0.795}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_20-80_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_20-80_last_finetune_and_eval': 0.78}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_20-80_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_20-80_first_finetune_and_eval': 0.77}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_20-80_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_100_val_pct_20-80_middle_finetune_and_eval': 0.805}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments_val_tweet_eval_train_pct_100_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_tweet_eval_train_pct_100_val_pct_100_all_finetune_and_eval': 0.555}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments_val_tweet_eval_train_pct_100_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_tweet_eval_train_pct_100_val_pct_100_last_finetune_and_eval': 0.72}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments_val_tweet_eval_train_pct_100_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_tweet_eval_train_pct_100_val_pct_100_first_finetune_and_eval': 0.745}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments_val_tweet_eval_train_pct_100_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_tweet_eval_train_pct_100_val_pct_100_middle_finetune_and_eval': 0.755}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_80-20_val_pct_80-20_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_80-20_val_pct_80-20_all_finetune_and_eval': 0.61}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_80-20_val_pct_80-20_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_80-20_val_pct_80-20_last_finetune_and_eval': 0.795}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_80-20_val_pct_80-20_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_80-20_val_pct_80-20_first_finetune_and_eval': 0.785}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_80-20_val_pct_80-20_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments_val_civil_comments-tweet_eval_train_pct_80-20_val_pct_80-20_middle_finetune_and_eval': 0.765}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_60-40_val_pct_60-40_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_60-40_val_pct_60-40_all_finetune_and_eval': 0.715}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_60-40_val_pct_60-40_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_60-40_val_pct_60-40_last_finetune_and_eval': 0.77}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_60-40_val_pct_60-40_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_60-40_val_pct_60-40_first_finetune_and_eval': 0.785}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_60-40_val_pct_60-40_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_60-40_val_pct_60-40_middle_finetune_and_eval': 0.78}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_40-60_val_pct_40-60_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_40-60_val_pct_40-60_all_finetune_and_eval': 0.8}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_40-60_val_pct_40-60_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_40-60_val_pct_40-60_last_finetune_and_eval': 0.775}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_40-60_val_pct_40-60_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_40-60_val_pct_40-60_first_finetune_and_eval': 0.775}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_40-60_val_pct_40-60_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_40-60_val_pct_40-60_middle_finetune_and_eval': 0.805}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_20-80_val_pct_20-80_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_20-80_val_pct_20-80_all_finetune_and_eval': 0.685}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_20-80_val_pct_20-80_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_20-80_val_pct_20-80_last_finetune_and_eval': 0.755}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_20-80_val_pct_20-80_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_20-80_val_pct_20-80_first_finetune_and_eval': 0.73}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_20-80_val_pct_20-80_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments-tweet_eval_train_pct_20-80_val_pct_20-80_middle_finetune_and_eval': 0.76}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_all_finetune_and_eval': 0.71}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_last_finetune_and_eval': 0.79}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_first_finetune_and_eval': 0.775}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_middle_finetune_and_eval': 0.825}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_80-20_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_80-20_val_pct_100_all_finetune_and_eval': 0.845}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_80-20_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_80-20_val_pct_100_last_finetune_and_eval': 0.805}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_80-20_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_80-20_val_pct_100_first_finetune_and_eval': 0.835}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_80-20_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_80-20_val_pct_100_middle_finetune_and_eval': 0.79}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_60-40_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_60-40_val_pct_100_all_finetune_and_eval': 0.735}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_60-40_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_60-40_val_pct_100_last_finetune_and_eval': 0.8}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_60-40_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_60-40_val_pct_100_first_finetune_and_eval': 0.82}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_60-40_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_60-40_val_pct_100_middle_finetune_and_eval': 0.765}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_40-60_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_40-60_val_pct_100_all_finetune_and_eval': 0.81}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_40-60_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_40-60_val_pct_100_last_finetune_and_eval': 0.785}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_40-60_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_40-60_val_pct_100_first_finetune_and_eval': 0.825}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_40-60_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_40-60_val_pct_100_middle_finetune_and_eval': 0.845}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_20-80_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_20-80_val_pct_100_all_finetune_and_eval': 0.77}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_20-80_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_20-80_val_pct_100_last_finetune_and_eval': 0.805}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_20-80_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_20-80_val_pct_100_first_finetune_and_eval': 0.79}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_20-80_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_civil_comments-tweet_eval_val_civil_comments_train_pct_20-80_val_pct_100_middle_finetune_and_eval': 0.795}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_all_finetune_and_eval': 0.715}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_last_finetune_and_eval': 0.745}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_first_finetune_and_eval': 0.78}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_tweet_eval_val_civil_comments_train_pct_100_val_pct_100_middle_finetune_and_eval': 0.76}
