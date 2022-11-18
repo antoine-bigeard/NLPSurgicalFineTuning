@@ -24,6 +24,7 @@ import transformers
 import tqdm
 import yaml
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--model")
 parser.add_argument("--dataset")
@@ -33,15 +34,16 @@ parser.add_argument("--train_dataset", default = "amazon_electronics")
 parser.add_argument("--val_dataset", default = "amazon_electronics")
 parser.add_argument("--mode", default="all")
 parser.add_argument(
-    "--path_ckpt",
-    default = None,
+    "--path_ckpt", default = None,
     # default="results/ft/fine_tuned_bert-med_-train_amazon_video_amazon_books_-val_amazon_video_amazon_books_-train_pct_80_20_-val_pct__20_80_all.pt",
 )
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
 parser.add_argument("--nbr_batch", default=1000, type=int)
 parser.add_argument("--device", default="cpu")
+parser.add_argument('--eval_only', default= 0, type = int)
 args = parser.parse_args()
+
 
 DEVICE = torch.device(args.device)
 
@@ -76,6 +78,15 @@ def parameters_to_fine_tune(model: nn.Module, mode: str) -> List:
     if mode == "all":
         params = [p for p in model.parameters() if p.requires_grad]
         return params
+    elif mode == "last":
+        return list(model.transformer.h[-2:].parameters())
+    elif mode == "first":
+        return list(model.transformer.h[:2].parameters())
+    elif mode == "middle":
+        n_trans = len(model.transformer.h)
+        return list(
+            model.transformer.h[n_trans // 2 - 1 : n_trans // 2 + 1].parameters()
+        )
     else:
         raise NotImplementedError()
 
@@ -162,8 +173,14 @@ def run_ft(
             if args.path_ckpt is not None:
                 ckpt = torch.load(args.path_ckpt)
                 model.load_state_dict(ckpt["model_state_dict"])
-            fine_tuned = ft_bert(model, tokenizer, train["x"], train["y"], mode, nbr_batch)
-            val_acc = eval(fine_tuned, tokenizer, val)
+
+            if args.eval_only == 0:
+                fine_tuned = ft_bert(model, tokenizer, train["x"], train["y"], mode, nbr_batch)
+                val_acc = eval(fine_tuned, tokenizer, val)
+            else:
+                val_acc = eval(model, tokenizer, val)
+
+            eval_only_str = (args.eval_only == 0) * "eval_only" + (args.eval_only == 1) * "finetune_and_eval"
             description_str = "_".join(
                 [
                     model_name,
@@ -176,6 +193,7 @@ def run_ft(
                     "val_pct",
                     "-".join([str(p) for p in val_percentages]),
                     mode,
+                    eval_only_str,
                 ]
             )
             results[description_str] = val_acc
@@ -185,11 +203,12 @@ def run_ft(
             if not os.path.exists(f"results/{question}"):
                 os.makedirs(f"results/{question}")
 
-            path_ckpt = f"results/ft/fine_tuned_{description_str}.pt"
-            torch.save(
-                {"model_state_dict": fine_tuned.state_dict()},
-                path_ckpt,
-            )
+            if args.eval_only == 0:
+                path_ckpt = f"results/ft/fine_tuned_{description_str}.pt"
+                torch.save(
+                    {"model_state_dict": fine_tuned.state_dict()},
+                    path_ckpt,
+                )
 
             print(results)
 

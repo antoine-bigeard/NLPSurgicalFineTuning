@@ -31,6 +31,12 @@ def dataset2hfname(dataset: str) -> str:
         "amazon_video": ("amazon_us_reviews", "Video_v1_00"),
         "amazon_books": ("amazon_us_reviews", "Books_v1_00"),
         "amazon_electronics": ("amazon_us_reviews", "Mobile_Electronics_v1_00"),
+        "amazon_kitchen": ("amazon_us_reviews", "Kitchen_v1_00"),
+        "amazon_shoes": ("amazon_us_reviews", "Shoes_v1_00"),
+        "amazon_grocery": ("amazon_us_reviews", "Grocery_v1_00"),
+        "amazon_luggage": ("amazon_us_reviews", "Luggage_v1_00"),
+        
+
         "tweet_eval": ("tweet_eval", "hate"),
         "civil_comments": ("civil_comments",),
     }[dataset]
