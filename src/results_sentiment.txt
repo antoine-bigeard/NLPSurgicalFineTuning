@@ -1,0 +1,256 @@
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books_val_amazon_books_train_pct_100_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books_train_pct_100_val_pct_100_all_finetune_and_eval': 0.2}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books_val_amazon_books_train_pct_100_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books_train_pct_100_val_pct_100_last_finetune_and_eval': 0.4984}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books_val_amazon_books_train_pct_100_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books_train_pct_100_val_pct_100_first_finetune_and_eval': 0.4702}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books_val_amazon_books_train_pct_100_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books_train_pct_100_val_pct_100_middle_finetune_and_eval': 0.5086}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_80-20_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_80-20_all_finetune_and_eval': 0.4184}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_80-20_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_80-20_last_finetune_and_eval': 0.4934}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_80-20_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_80-20_first_finetune_and_eval': 0.481}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_80-20_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_80-20_middle_finetune_and_eval': 0.5036}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_60-40_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_60-40_all_finetune_and_eval': 0.3388}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_60-40_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_60-40_last_finetune_and_eval': 0.4938}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_60-40_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_60-40_first_finetune_and_eval': 0.472}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_60-40_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_60-40_middle_finetune_and_eval': 0.3586}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_40-60_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_40-60_all_finetune_and_eval': 0.3904}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_40-60_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_40-60_last_finetune_and_eval': 0.475}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_40-60_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_40-60_first_finetune_and_eval': 0.4734}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_40-60_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_40-60_middle_finetune_and_eval': 0.4676}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_20-80_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_20-80_all_finetune_and_eval': 0.2}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_20-80_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_20-80_last_finetune_and_eval': 0.4808}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_20-80_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_20-80_first_finetune_and_eval': 0.4406}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_20-80_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_100_val_pct_20-80_middle_finetune_and_eval': 0.4582}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books_val_amazon_video_train_pct_100_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_video_train_pct_100_val_pct_100_all_finetune_and_eval': 0.2}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books_val_amazon_video_train_pct_100_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_video_train_pct_100_val_pct_100_last_finetune_and_eval': 0.4536}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books_val_amazon_video_train_pct_100_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_video_train_pct_100_val_pct_100_first_finetune_and_eval': 0.4612}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books_val_amazon_video_train_pct_100_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_video_train_pct_100_val_pct_100_middle_finetune_and_eval': 0.4708}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_80-20_val_pct_80-20_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_80-20_val_pct_80-20_all_finetune_and_eval': 0.2}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_80-20_val_pct_80-20_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_80-20_val_pct_80-20_last_finetune_and_eval': 0.5006}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_80-20_val_pct_80-20_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_80-20_val_pct_80-20_first_finetune_and_eval': 0.4858}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_80-20_val_pct_80-20_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books_val_amazon_books-amazon_video_train_pct_80-20_val_pct_80-20_middle_finetune_and_eval': 0.5052}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_60-40_val_pct_60-40_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_60-40_val_pct_60-40_all_finetune_and_eval': 0.2}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_60-40_val_pct_60-40_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_60-40_val_pct_60-40_last_finetune_and_eval': 0.5092}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_60-40_val_pct_60-40_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_60-40_val_pct_60-40_first_finetune_and_eval': 0.4828}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_60-40_val_pct_60-40_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_60-40_val_pct_60-40_middle_finetune_and_eval': 0.4888}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_40-60_val_pct_40-60_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_40-60_val_pct_40-60_all_finetune_and_eval': 0.2}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_40-60_val_pct_40-60_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_40-60_val_pct_40-60_last_finetune_and_eval': 0.5168}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_40-60_val_pct_40-60_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_40-60_val_pct_40-60_first_finetune_and_eval': 0.485}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_40-60_val_pct_40-60_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_40-60_val_pct_40-60_middle_finetune_and_eval': 0.5042}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_20-80_val_pct_20-80_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_20-80_val_pct_20-80_all_finetune_and_eval': 0.447}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_20-80_val_pct_20-80_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_20-80_val_pct_20-80_last_finetune_and_eval': 0.4918}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_20-80_val_pct_20-80_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_20-80_val_pct_20-80_first_finetune_and_eval': 0.4916}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_20-80_val_pct_20-80_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_20-80_val_pct_20-80_middle_finetune_and_eval': 0.4884}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_all_finetune_and_eval': 0.2}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_last_finetune_and_eval': 0.4712}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_first_finetune_and_eval': 0.4352}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_middle_finetune_and_eval': 0.4648}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_80-20_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_80-20_val_pct_100_all_finetune_and_eval': 0.3386}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_80-20_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_80-20_val_pct_100_last_finetune_and_eval': 0.5098}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_80-20_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_80-20_val_pct_100_first_finetune_and_eval': 0.4976}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_80-20_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_80-20_val_pct_100_middle_finetune_and_eval': 0.5078}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_60-40_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_60-40_val_pct_100_all_finetune_and_eval': 0.45}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_60-40_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_60-40_val_pct_100_last_finetune_and_eval': 0.5}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_60-40_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_60-40_val_pct_100_first_finetune_and_eval': 0.4802}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_60-40_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_60-40_val_pct_100_middle_finetune_and_eval': 0.49}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_40-60_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_40-60_val_pct_100_all_finetune_and_eval': 0.2}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_40-60_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_40-60_val_pct_100_last_finetune_and_eval': 0.5008}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_40-60_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_40-60_val_pct_100_first_finetune_and_eval': 0.4812}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_40-60_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_40-60_val_pct_100_middle_finetune_and_eval': 0.5096}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_20-80_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_20-80_val_pct_100_all_finetune_and_eval': 0.4398}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_20-80_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_20-80_val_pct_100_last_finetune_and_eval': 0.4948}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_20-80_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_20-80_val_pct_100_first_finetune_and_eval': 0.4632}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_20-80_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_books-amazon_video_val_amazon_books_train_pct_20-80_val_pct_100_middle_finetune_and_eval': 0.5006}
+Fine-tuning bert-med on and mode=all
+Begin training for bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_all_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_all_finetune_and_eval': 0.2724}
+Fine-tuning bert-med on and mode=last
+Begin training for bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_last_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_last_finetune_and_eval': 0.4618}
+Fine-tuning bert-med on and mode=first
+Begin training for bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_first_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_first_finetune_and_eval': 0.439}
+Fine-tuning bert-med on and mode=middle
+Begin training for bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_middle_finetune_and_eval
+Beginning repeat #0
+{'bert-med_train_amazon_video_val_amazon_books_train_pct_100_val_pct_100_middle_finetune_and_eval': 0.4362}
