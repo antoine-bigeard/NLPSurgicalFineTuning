@@ -99,7 +99,7 @@ def get_acc(logits, targets):
     return torch.mean(y).item()
 
 
-def ft_bert(model, tok, x, y, mode, nbr_batch=10000, batch_size=196, saving_path = ""):
+def ft_bert(model, tok, x, y, mode, val, nbr_batch=5000, batch_size=32, saving_path = ""):
     model = copy.deepcopy(model)
 
     model.to(DEVICE)
@@ -133,9 +133,11 @@ def ft_bert(model, tok, x, y, mode, nbr_batch=10000, batch_size=196, saving_path
                 total_acc = get_acc(model(**all_x).logits, all_y)
             pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
         if step % 500 == 0 and saving_path != "":
+            val_acc = eval(model, tok, val)
+            print(f"\n Validation accuracy: {val_acc}")
             torch.save(
                     {"model_state_dict": model.state_dict()},
-                    saving_path + "_total_acc_" + str(round(total_acc,2)) + f"_step_{step}.pt",
+                    saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
                 )
 
 
@@ -150,7 +152,7 @@ def run_ft(
     val_percentages,
     modes,
     nbr_batch,
-    n_train: int = 5000,
+    n_train: int = 7000,
     n_val: int = 200,
 ):
     results = {}
@@ -203,7 +205,7 @@ def run_ft(
                 
             if args.eval_only == 0:
                 fine_tuned = ft_bert(
-                    model, tokenizer, train["x"], train["y"], mode, nbr_batch, saving_path=path_ckpt[:-3]
+                    model, tokenizer, train["x"], train["y"], mode, val, nbr_batch, saving_path=path_ckpt[:-3]
                 )
                 val_acc = eval(fine_tuned, tokenizer, val)
             else:
