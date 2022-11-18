@@ -11,7 +11,6 @@ import sys
 
 sys.path.insert(0, ".")
 
-from utils import *
 from src.utils import *
 
 import argparse
@@ -34,11 +33,7 @@ parser.add_argument("--val_percentages", default="100")
 parser.add_argument("--train_dataset", default="amazon_electronics")
 parser.add_argument("--val_dataset", default="amazon_electronics")
 parser.add_argument("--mode", default="all")
-parser.add_argument(
-    "--path_ckpt",
-    default=None,
-    # default="results/ft/fine_tuned_bert-med_-train_amazon_video_amazon_books_-val_amazon_video_amazon_books_-train_pct_80_20_-val_pct__20_80_all.pt",
-)
+parser.add_argument("--path_ckpt", default=None)
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
 parser.add_argument("--nbr_batch", default=1000, type=int)
@@ -184,9 +179,9 @@ def run_ft(
             else:
                 val_acc = eval(model, tokenizer, val)
 
-            eval_only_str = (args.eval_only == 0) * "eval_only" + (
+            eval_only_str = (args.eval_only == 0) * "finetune_and_eval" + (
                 args.eval_only == 1
-            ) * "finetune_and_eval"
+            ) * "eval_only"
             description_str = "_".join(
                 [
                     model_name,
@@ -226,23 +221,12 @@ def run_ft(
 if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
-    # run_ft(
-    #     args.model.split(","),
-    #     args.train_dataset.split(","),
-    #     args.val_dataset.split(","),
-    #     train_percentages,
-    #     val_percentages,
-    #     args.mode.split(","),
-    #     args.nbr_batch,
-    # )
-    train_percentages = [100, 0]
-    val_percentages = [100, 0]
     run_ft(
-        ["bert-med"],
-        ["amazon_electronics", "amazon_video"],
-        ["amazon_electronics", "amazon_video"],
+        args.model.split(","),
+        args.train_dataset.split(","),
+        args.val_dataset.split(","),
         train_percentages,
         val_percentages,
         args.mode.split(","),
-        100,
+        args.nbr_batch,
     )
