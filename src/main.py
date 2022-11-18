@@ -135,10 +135,10 @@ def ft_bert(model, tok, x, y, mode, val, nbr_batch=5000, batch_size=32, saving_p
         if step % 500 == 0 and saving_path != "":
             val_acc = eval(model, tok, val)
             print(f"\n Validation accuracy: {val_acc}")
-            torch.save(
-                    {"model_state_dict": model.state_dict()},
-                    saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
-                )
+            # torch.save(
+            #         {"model_state_dict": model.state_dict()},
+            #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
+            #     )
 
 
     return model
