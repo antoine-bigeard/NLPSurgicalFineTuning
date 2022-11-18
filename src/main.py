@@ -132,8 +132,8 @@ def ft_bert(model, tok, x, y, mode, nbr_batch=10000, batch_size=8):
             with torch.inference_mode():
                 total_acc = get_acc(model(**all_x).logits, all_y)
             pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
-            if total_acc > 0.75:
-                break
+            # if total_acc > 0.75:
+            #     break
     return model
 
 
