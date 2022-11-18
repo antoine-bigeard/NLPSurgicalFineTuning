@@ -34,10 +34,12 @@ parser.add_argument("--val_dataset", default = "amazon_electronics")
 parser.add_argument("--mode", default="all")
 parser.add_argument(
     "--path_ckpt",
+    default = None,
     # default="results/ft/fine_tuned_bert-med_-train_amazon_video_amazon_books_-val_amazon_video_amazon_books_-train_pct_80_20_-val_pct__20_80_all.pt",
 )
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
+parser.add_argument("--nbr_batch", default=1000, type=int)
 parser.add_argument("--device", default="cpu")
 args = parser.parse_args()
 
@@ -89,7 +91,7 @@ def get_acc(logits, targets):
     return torch.mean(y).item()
 
 
-def ft_bert(model, tok, x, y, mode, batch_size=8):
+def ft_bert(model, tok, x, y, mode, nbr_batch=10000, batch_size=8):
     model = copy.deepcopy(model)
 
     model.to(DEVICE)
@@ -99,7 +101,7 @@ def ft_bert(model, tok, x, y, mode, batch_size=8):
         x, return_tensors="pt", padding=True, truncation=True, max_length=100
     ).to(DEVICE)
     all_y = torch.tensor(y, device=DEVICE)
-    pbar = tqdm.tqdm(range(1))
+    pbar = tqdm.tqdm(range(nbr_batch))
     for step in pbar:
         batch = np.random.randint(0, len(x), batch_size)
         x_ = tok(
@@ -134,6 +136,7 @@ def run_ft(
     train_percentages: List[int],
     val_percentages: List[int],
     modes: List[str],
+    nbr_batch,
     n_train: int = 200,
     n_val: int = 40,
 ):
@@ -159,7 +162,7 @@ def run_ft(
             if args.path_ckpt is not None:
                 ckpt = torch.load(args.path_ckpt)
                 model.load_state_dict(ckpt["model_state_dict"])
-            fine_tuned = ft_bert(model, tokenizer, train["x"], train["y"], mode)
+            fine_tuned = ft_bert(model, tokenizer, train["x"], train["y"], mode, nbr_batch)
             val_acc = eval(fine_tuned, tokenizer, val)
             description_str = "_".join(
                 [
@@ -199,7 +202,7 @@ def run_ft(
 if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
-    run_ft(args.model.split(","), args.train_dataset.split(","), args.val_dataset.split(","), train_percentages, val_percentages, args.mode.split(","))
+    run_ft(args.model.split(","), args.train_dataset.split(","), args.val_dataset.split(","), train_percentages, val_percentages, args.mode.split(","), args.nbr_batch)
     # train_percentages = [100, 0]
     # val_percentages = [100, 0]
     # run_ft(
