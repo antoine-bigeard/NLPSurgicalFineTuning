@@ -76,6 +76,31 @@ def get_data(dataset: str, num_samples: int):
     else: ## To be filled with the logic to extract other datasets
         raise NotImplementedError()
 
+"""TO UPDATE FOR NEXT PUSH
+"""
+# def get_single_dataset_train_val(
+#     ds: str,
+#     train_pct: List[int],
+#     val_pct: List[int],
+#     n_train: int,
+#     n_val: int = 100,
+# ):
+
+#     train_data = defaultdict()
+#     val_data = defaultdict()
+
+#     train_samples = int((n_train * train_pct) / 100)
+#     val_samples = int((n_val * val_pct) / 100)
+#     df_train, _ = get_data(ds, train_samples, mode="train")
+#     df_val, _ = get_data(ds, val_samples, mode="val")
+#     train_data["x"] = df_train["x"][: 5 * train_samples]
+#     train_data["y"] = df_train["y"][: 5 * train_samples]
+#     val_data["x"] = df_val["x"][5 * val_samples]
+#     val_data["y"] = df_val["y"][5 * val_samples]
+
+#     return train_data, val_data
+
+
 def get_single_dataset(
     ds: str,
     train_pct: List[int],

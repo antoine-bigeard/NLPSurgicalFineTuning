@@ -12,6 +12,7 @@ import sys
 sys.path.insert(0, ".")
 
 from utils import *
+from src.utils import *
 
 import argparse
 import copy
@@ -28,20 +29,21 @@ import yaml
 parser = argparse.ArgumentParser()
 parser.add_argument("--model")
 parser.add_argument("--dataset")
-parser.add_argument("--train_percentages", default = "100")
-parser.add_argument("--val_percentages", default = "100")
-parser.add_argument("--train_dataset", default = "amazon_electronics")
-parser.add_argument("--val_dataset", default = "amazon_electronics")
+parser.add_argument("--train_percentages", default="100")
+parser.add_argument("--val_percentages", default="100")
+parser.add_argument("--train_dataset", default="amazon_electronics")
+parser.add_argument("--val_dataset", default="amazon_electronics")
 parser.add_argument("--mode", default="all")
 parser.add_argument(
-    "--path_ckpt", default = None,
+    "--path_ckpt",
+    default=None,
     # default="results/ft/fine_tuned_bert-med_-train_amazon_video_amazon_books_-val_amazon_video_amazon_books_-train_pct_80_20_-val_pct__20_80_all.pt",
 )
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
 parser.add_argument("--nbr_batch", default=1000, type=int)
 parser.add_argument("--device", default="cpu")
-parser.add_argument('--eval_only', default= 0, type = int)
+parser.add_argument("--eval_only", default=0, type=int)
 args = parser.parse_args()
 
 
@@ -62,7 +64,7 @@ def eval(model, tok, val_data):
     return get_acc(logits, y)
 
 
-def parameters_to_fine_tune(model: nn.Module, mode: str) -> List:
+def parameters_to_fine_tune(model: nn.Module, mode: str):
     """
     Select the parameters in `model` that should be fine-tuned in mode `mode`.
 
@@ -79,13 +81,13 @@ def parameters_to_fine_tune(model: nn.Module, mode: str) -> List:
         params = [p for p in model.parameters() if p.requires_grad]
         return params
     elif mode == "last":
-        return list(model.transformer.h[-2:].parameters())
+        return list(model.bert.encoder.layer[-2:].parameters())
     elif mode == "first":
-        return list(model.transformer.h[:2].parameters())
+        return list(model.bert.encoder.layer[:2].parameters())
     elif mode == "middle":
-        n_trans = len(model.transformer.h)
+        n_trans = len(model.bert.encoder.layer)
         return list(
-            model.transformer.h[n_trans // 2 - 1 : n_trans // 2 + 1].parameters()
+            model.bert.encoder.layer[n_trans // 2 - 1 : n_trans // 2 + 1].parameters()
         )
     else:
         raise NotImplementedError()
@@ -141,12 +143,12 @@ def ft_bert(model, tok, x, y, mode, nbr_batch=10000, batch_size=8):
 
 
 def run_ft(
-    models: List[str],
-    train_datasets: List[str],
-    val_datasets: List[str],
-    train_percentages: List[int],
-    val_percentages: List[int],
-    modes: List[str],
+    models,
+    train_datasets,
+    val_datasets,
+    train_percentages,
+    val_percentages,
+    modes,
     nbr_batch,
     n_train: int = 200,
     n_val: int = 40,
@@ -175,12 +177,16 @@ def run_ft(
                 model.load_state_dict(ckpt["model_state_dict"])
 
             if args.eval_only == 0:
-                fine_tuned = ft_bert(model, tokenizer, train["x"], train["y"], mode, nbr_batch)
+                fine_tuned = ft_bert(
+                    model, tokenizer, train["x"], train["y"], mode, nbr_batch
+                )
                 val_acc = eval(fine_tuned, tokenizer, val)
             else:
                 val_acc = eval(model, tokenizer, val)
 
-            eval_only_str = (args.eval_only == 0) * "eval_only" + (args.eval_only == 1) * "finetune_and_eval"
+            eval_only_str = (args.eval_only == 0) * "eval_only" + (
+                args.eval_only == 1
+            ) * "finetune_and_eval"
             description_str = "_".join(
                 [
                     model_name,
@@ -197,7 +203,6 @@ def run_ft(
                 ]
             )
             results[description_str] = val_acc
-
 
             question = "ft"
             if not os.path.exists(f"results/{question}"):
@@ -221,14 +226,23 @@ def run_ft(
 if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
-    run_ft(args.model.split(","), args.train_dataset.split(","), args.val_dataset.split(","), train_percentages, val_percentages, args.mode.split(","), args.nbr_batch)
-    # train_percentages = [100, 0]
-    # val_percentages = [100, 0]
     # run_ft(
-    #     ["bert-med"],
-    #     ["amazon_electronics", "amazon_video"],
-    #     ["amazon_electronics", "amazon_video"],   
+    #     args.model.split(","),
+    #     args.train_dataset.split(","),
+    #     args.val_dataset.split(","),
     #     train_percentages,
     #     val_percentages,
     #     args.mode.split(","),
+    #     args.nbr_batch,
     # )
+    train_percentages = [100, 0]
+    val_percentages = [100, 0]
+    run_ft(
+        ["bert-med"],
+        ["amazon_electronics", "amazon_video"],
+        ["amazon_electronics", "amazon_video"],
+        train_percentages,
+        val_percentages,
+        args.mode.split(","),
+        100,
+    )
