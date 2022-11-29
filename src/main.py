@@ -38,6 +38,7 @@ parser.add_argument("--path_ckpt", default=None)
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
 parser.add_argument("--nbr_batch", default=1000, type=int)
+parser.add_argument("--batch_size", default=8, type=int)
 parser.add_argument("--device", default="cpu")
 parser.add_argument("--eval_only", default=0, type=int)
 parser.add_argument("--n_train", default=1000, type=int)
@@ -87,10 +88,10 @@ def get_acc(logits, targets):
     y = y.type(torch.float)
     return torch.mean(y).item()
 
-def eval(model, tok, val_data):
+def eval(model, tok, val_data, batch_size):
     # print("Validation")
     # print(len(val_data["x"]))
-    eval_dataloader = DataLoader(list(zip(val_data["x"], val_data["y"])), batch_size=8, shuffle=True, collate_fn=None)
+    eval_dataloader = DataLoader(list(zip(val_data["x"], val_data["y"])), batch_size=batch_size, shuffle=True, collate_fn=None)
 
     pbar = tqdm.tqdm(enumerate(eval_dataloader))
     accuracies = []
@@ -116,8 +117,8 @@ def ft_bert(model, tok, x, y, mode, nbr_batch=5000, batch_size=32, saving_path =
 
     model.to(DEVICE)
 
-    train_dataloader = DataLoader(list(zip(x, y)), batch_size=8, shuffle=True, collate_fn=None)
-    eval_dataloader = DataLoader(list(zip(x, y)), batch_size=8, shuffle=True, collate_fn=None)
+    train_dataloader = DataLoader(list(zip(x, y)), batch_size=batch_size, shuffle=True, collate_fn=None)
+    eval_dataloader = DataLoader(list(zip(x, y)), batch_size=batch_size, shuffle=True, collate_fn=None)
 
     optimizer = torch.optim.Adam(parameters_to_fine_tune(model, mode), lr=1e-4)
     # all_x = tok(
@@ -180,6 +181,7 @@ def run_ft(
     test_percentages: List[int],
     modes: List[str],
     nbr_batch,
+    batch_size,
     n_train: int = 1000,
     n_val: int = 100,
 ):
@@ -245,11 +247,11 @@ def run_ft(
                 
             if args.eval_only == 0:
                 fine_tuned = ft_bert(
-                    model, tokenizer, train["x"], train["y"], mode, val, nbr_batch, saving_path=path_ckpt[:-3]
+                    model, tokenizer, train["x"], train["y"], mode, val, nbr_batch, batch_size=batch_size, saving_path=path_ckpt[:-3]
                 )
-                val_acc = eval(fine_tuned, tokenizer, val)
+                val_acc = eval(fine_tuned, tokenizer, val, batch_size)
             else:
-                val_acc = eval(model, tokenizer, val)
+                val_acc = eval(model, tokenizer, val, batch_size)
 
             results[description_str] = val_acc
 
@@ -282,6 +284,7 @@ if __name__ == "__main__":
         val_percentages,
         args.mode.split(","),
         args.nbr_batch,
+        args.batch_size,
         args.n_train,
         args.n_val
     )
