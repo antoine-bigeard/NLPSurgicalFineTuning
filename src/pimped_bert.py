@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import copy
 
 
@@ -12,7 +13,7 @@ class CombinationBlock(nn.Module):
         self.alpha = nn.Parameter(torch.Tensor(0.5))
 
     def forward(self, x):
-        return self.alpha * self.block(x) + (1 - self.alpha) * self.frozen_block(x)
+        return F.sigmoid(self.alpha) * self.block(x) + (1 - F.sigmoid(self.alpha)) * self.frozen_block(x)
 
 
 class SurgicalFineTuningBert(nn.Module):
