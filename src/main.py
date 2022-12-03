@@ -10,6 +10,7 @@
 import sys
 
 sys.path.insert(0, ".")
+from src.pimped_bert import *
 
 from utils import *
 
@@ -149,6 +150,8 @@ def ft_bert(model, tok, x, y, mode, nbr_batch=5000, batch_size=32, saving_path =
             max_length=100,
         ).to(DEVICE)
         y_ = torch.tensor(y, device=DEVICE)
+        pimped_bert = SurgicalFineTuningBert(model)
+        pimped_bert(**x_)
         logits = model(**x_).logits
         loss = get_loss(logits, y_)
         loss.backward()
@@ -246,8 +249,11 @@ def run_ft(
                 model = fine_tuned
                 
             if args.eval_only == 0:
+                # fine_tuned = ft_bert(
+                #     model, tokenizer, train["x"], train["y"], mode, val, nbr_batch=nbr_batch, batch_size=batch_size, saving_path=path_ckpt[:-3]
+                # )
                 fine_tuned = ft_bert(
-                    model, tokenizer, train["x"], train["y"], mode, val, nbr_batch, batch_size=batch_size, saving_path=path_ckpt[:-3]
+                    model, tokenizer, train["x"], train["y"], mode, nbr_batch=nbr_batch, batch_size=batch_size, saving_path=path_ckpt[:-3]
                 )
                 val_acc = eval(fine_tuned, tokenizer, val, batch_size)
             else:

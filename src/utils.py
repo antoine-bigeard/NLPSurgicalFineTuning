@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from typing import List
 from collections import defaultdict
-from cleantext import clean
 
 
 logging.basicConfig()

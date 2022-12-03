@@ -8,12 +8,13 @@ class CombinationBlock(nn.Module):
     """For now just linear combination of the two blocks."""
 
     def __init__(self, block, frozen_block) -> None:
+        super().__init__()
         self.block = block
         self.frozen_block = frozen_block
-        self.alpha = nn.Parameter(torch.Tensor(0.5))
+        self.alpha = nn.Parameter(torch.Tensor([0]))
 
     def forward(self, x):
-        return F.sigmoid(self.alpha) * self.block(x) + (1 - F.sigmoid(self.alpha)) * self.frozen_block(x)
+        return F.sigmoid(self.alpha) * self.block(**x) + (1 - F.sigmoid(self.alpha)) * self.frozen_block(**x)
 
 
 class SurgicalFineTuningBert(nn.Module):
@@ -21,6 +22,7 @@ class SurgicalFineTuningBert(nn.Module):
         self,
         bert_model,
     ) -> None:
+        super().__init__()
         self.bert_model = bert_model
         # copy the model
         self.frozen_bert_model = copy.deepcopy(bert_model)
@@ -29,7 +31,7 @@ class SurgicalFineTuningBert(nn.Module):
             param.requires_grad = False
 
         self.combination_blocks = nn.Sequential(
-            [
+            *[
                 CombinationBlock(
                     self.bert_model.bert.encoder.layer[i],
                     self.frozen_bert_model.bert.encoder.layer[i],
@@ -40,3 +42,7 @@ class SurgicalFineTuningBert(nn.Module):
 
     def forward(self, x):
         return self.combination_blocks(x)
+
+    def get_alphas(self):
+        return [block.alpha for block in self.combination_blocks]
+
