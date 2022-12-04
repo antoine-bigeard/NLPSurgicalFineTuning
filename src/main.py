@@ -205,9 +205,12 @@ def run_ft(
         model = None
         tokenizer = None
         if("amazon" in train_datasets[0]):
-            model, tokenizer = get_model_and_tokenizer(
+            model, _ = get_model_and_tokenizer(
                 model_name, transformers.AutoModelForSequenceClassification, num_labels=5
             )
+            _, tokenizer = get_model_and_tokenizer(
+                model_name, transformers.BertTokenizer, num_labels=5
+             )
         else:
             model, tokenizer = get_model_and_tokenizer(
                 model_name, transformers.AutoModelForSequenceClassification, num_labels=2
