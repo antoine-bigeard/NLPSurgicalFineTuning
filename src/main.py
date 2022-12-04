@@ -32,7 +32,7 @@ parser.add_argument("--repeats", default=1, type=int)
 parser.add_argument("--batch_size", default=8, type=int)
 parser.add_argument("--device", default="cpu")
 parser.add_argument("--eval_only", default=0, type=int)
-parser.add_argument("--n_train", default=1000, type=int)
+parser.add_argument("--n_train", default=10000, type=int)
 parser.add_argument("--n_val", default=100, type=int)
 args = parser.parse_args()
 
@@ -124,14 +124,12 @@ def ft_bert(model, tok, x, y, val, mode, batch_size=32, saving_path=""):
         optimizer = torch.optim.Adam(all_params, lr=1e-4)
 
     train_dataloader = DataLoader(
-        list(zip(x, y)), batch_size=batch_size, shuffle=True, collate_fn=None
+        list(zip(x, y)), batch_size=batch_size, shuffle=True
     )
     eval_dataloader = DataLoader(
-        list(zip(x, y)), batch_size=batch_size, shuffle=True, collate_fn=None
+        list(zip(x, y)), batch_size=batch_size, shuffle=True
     )
 
-    print(train_dataloader)
-    
     pbar = tqdm.tqdm(enumerate(train_dataloader))
     for step, data in pbar:
 
@@ -212,6 +210,12 @@ def run_ft(
         n_train,
         n_val,
     )
+
+    # Make sure that we don't have any none. That would need to be fixed at some point!
+    train['x'] = [x for x in train['x'] if x != None]
+    train['y'] = [y for y in train['y'] if y != None]
+    val['x'] = [x for x in val['x'] if x != None]
+    val['y'] = [y for y in val['y'] if y != None]
 
     for model_name, mode in itertools.product(models, modes):
         print(f"Fine-tuning {model_name} on and mode={mode}")

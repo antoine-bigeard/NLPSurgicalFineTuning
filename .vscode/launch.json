@@ -7,7 +7,8 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["--model", "bert-med", "--train_percentages", "95,5", "--val_percentages", "95,5", "--train_dataset", "amazon_electronics,amazon_video", "--val_dataset", "amazon_electronics,amazon_video", "--mode", "last,middle,first,all", "--eval_only", "0"],
+            // "args": ["--model", "bert-med", "--train_percentages", "95,5", "--val_percentages", "95,5", "--train_dataset", "amazon_electronics,amazon_video", "--val_dataset", "amazon_electronics,amazon_video", "--mode", "last,middle,first,all", "--eval_only", "0"],
+            "args": ["--model", "bert-med", "--train_percentages", "95,5", "--val_percentages", "95,5", "--train_dataset", "amazon_electronics,amazon_video", "--val_dataset", "amazon_electronics,amazon_video", "--mode", "pimped_bert", "--eval_only", "0", "--n_train", "10000", "--n_val", "1000", "--batch_size", "16"],
             "justMyCode": true
         },
     ]
