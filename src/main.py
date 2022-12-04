@@ -177,10 +177,10 @@ def ft_bert(model, tok, x, y, val, mode, batch_size=32, saving_path=""):
         pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
 
 
-        if step % 20 == 0: #and saving_path != ""
+        if step % 20 == 0 : #and saving_path != "":
             val_acc = eval(model, tok, val, batch_size, mode)
-            print(f"\n Validation accuracy: {val_acc}")
-            print("Alphas: ", model.get_alphas())
+            # print(f"\n Validation accuracy: {val_acc}")
+            # print("Alphas: ", model.get_alphas())
             # torch.save(
             #         {"model_state_dict": model.state_dict()},
             #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
@@ -265,10 +265,10 @@ def run_ft(
 
         for repeat in range(args.repeats):
 
-            path_ckpt = f"results/ft/fine_tuned_{description_str}.pt"
+            # path_ckpt = f"results/ft/fine_tuned_{description_str}.pt"
 
             print(f"Beginning repeat #{repeat}")
-            if args.path_ckpt is not None:
+            if args.path_ckpt is not None and os.path.exists(args.path_ckpt):
                 ckpt = torch.load(args.path_ckpt)
                 model.load_state_dict(ckpt["model_state_dict"])
 
@@ -284,7 +284,7 @@ def run_ft(
                     val,
                     mode,
                     batch_size=batch_size,
-                    saving_path=path_ckpt[:-3]
+                    saving_path=args.path_ckpt[:-3]
                 )
                 val_acc = eval(fine_tuned, tokenizer, val, batch_size, mode)
             else:
@@ -299,7 +299,7 @@ def run_ft(
             if args.eval_only == 0:
                 torch.save(
                     {"model_state_dict": fine_tuned.state_dict()},
-                    path_ckpt,
+                    args.path_ckpt,
                 )
 
             print(results)
