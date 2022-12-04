@@ -151,7 +151,7 @@ def ft_bert(model, tok, x, y, mode, nbr_batch=5000, batch_size=32, saving_path =
         ).to(DEVICE)
         y_ = torch.tensor(y, device=DEVICE)
         pimped_bert = SurgicalFineTuningBert(model)
-        pimped_bert(**x_)
+        pimped_bert(x_)
         logits = model(**x_).logits
         loss = get_loss(logits, y_)
         loss.backward()

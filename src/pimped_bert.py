@@ -11,11 +11,11 @@ class CombinationBlock(nn.Module):
         super().__init__()
         self.block = block
         self.frozen_block = frozen_block
-        self.alpha = nn.Parameter(torch.Tensor([0]))
+        self.alpha = nn.Parameter(torch.Tensor(0))
 
-    def forward(self, x):
-        print("forward called")
-        return F.sigmoid(self.alpha) * self.block(x) + (1 - F.sigmoid(self.alpha)) * self.frozen_block(x)
+    def forward(self, x, attention_mask):
+        # return F.sigmoid(self.alpha) * self.block(x) + (1 - F.sigmoid(self.alpha)) * self.frozen_block(x)
+        return 0.3 * self.block(x, attention_mask = attention_mask)[0] + (1 - 0.3) * self.frozen_block(x, attention_mask = attention_mask)[0]
 
 
 class SurgicalFineTuningBert(nn.Module):
@@ -42,11 +42,13 @@ class SurgicalFineTuningBert(nn.Module):
             ]
         )
 
-    def forward(self, **x):
+    def forward(self, x):
         print("calling block forward")
-        x_input = self.embedding_block(x.input_ids)
+        self.bert_model(**x)
+        x_input, attention_mask = self.embedding_block(x['input_ids']), x['attention_mask']
+        
         # mask = x.attention_mask
-        return self.combination_blocks(x_input)
+        return self.combination_blocks(x_input, attention_mask)
 
     def get_alphas(self):
         return [block.alpha for block in self.combination_blocks]
