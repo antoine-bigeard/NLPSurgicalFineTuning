@@ -89,9 +89,6 @@ def get_data(dataset: str, num_samples: int):
         x = [r for r in d["text"]]
         y = [int(r) for r in d["label"]]
 
-        # print("tweet_eval")
-        # print(len(x))
-        # print(len(y))
 
         df = defaultdict(lambda: [None] * 2 * num_samples)
         counts = defaultdict(int)
@@ -137,9 +134,6 @@ def get_data(dataset: str, num_samples: int):
                 counts[y[idx]] += 1
                 end_idx += 1
 
-        # print("civil_comments")
-        # print(len(x))
-        # print(len(y))
 
         # filter3 = lambda rows: [r is not None and len(r)>0 for r in df["x"]]
         # filter4 = lambda rows: [r is not None and r in [0,1] for r in df["y"]]

@@ -1,12 +1,3 @@
-# import pytorch_lightning as pl
-# from pytorch_lightning.loggers import TensorBoardLogger
-# from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
-
-
-# from src.data.datamodule.datamodule import MyDataModule
-# from src.model.model.pretrained_model import PretrainedTorchModel
-# from src.model.lit_model.lit_model import MyLitModel
-# from src.utils import read_yaml_config_file
 import sys
 
 sys.path.insert(0, ".")
@@ -38,7 +29,6 @@ parser.add_argument("--mode", default="all")
 parser.add_argument("--path_ckpt", default=None)
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
-parser.add_argument("--nbr_batch", default=1000, type=int)
 parser.add_argument("--batch_size", default=8, type=int)
 parser.add_argument("--device", default="cpu")
 parser.add_argument("--eval_only", default=0, type=int)
@@ -91,8 +81,6 @@ def get_acc(logits, targets):
 
 
 def eval(model, tok, val_data, batch_size):
-    # print("Validation")
-    # print(len(val_data["x"]))
     eval_dataloader = DataLoader(
         list(zip(val_data["x"], val_data["y"])),
         batch_size=batch_size,
@@ -104,7 +92,6 @@ def eval(model, tok, val_data, batch_size):
     accuracies = []
     for step, data in pbar:
         x, y = data
-        # x, y = zip(*data)
         x_ = tok(
             list(x),
             return_tensors="pt",
@@ -120,9 +107,15 @@ def eval(model, tok, val_data, batch_size):
     return np.mean(accuracies)
 
 
-def ft_bert(model, tok, x, y, mode, nbr_batch=5000, batch_size=32, saving_path=""):
-    model = copy.deepcopy(model)
-    pimped_bert = SurgicalFineTuningBert(model).to(DEVICE)
+def ft_bert(model, tok, x, y, val, mode, batch_size=32, saving_path=""):
+    model = copy.deepcopy(model).to(DEVICE)
+    
+    if mode != "pimped_bert":
+        optimizer = torch.optim.Adam(parameters_to_fine_tune(model, mode), lr=1e-4)
+    else:
+        model = SurgicalFineTuningBert(model).to(DEVICE)
+        all_params = [p for p in model.parameters() if p.requires_grad]
+        optimizer = torch.optim.Adam(all_params, lr=1e-4)
 
     train_dataloader = DataLoader(
         list(zip(x, y)), batch_size=batch_size, shuffle=True, collate_fn=None
@@ -130,28 +123,12 @@ def ft_bert(model, tok, x, y, mode, nbr_batch=5000, batch_size=32, saving_path="
     eval_dataloader = DataLoader(
         list(zip(x, y)), batch_size=batch_size, shuffle=True, collate_fn=None
     )
+    
 
-    optimizer = torch.optim.Adam(parameters_to_fine_tune(model, mode), lr=1e-4)
-    # all_x = tok(
-    #     train["x"], return_tensors="pt", padding=True, truncation=True, max_length=100
-    # ).to(DEVICE)
-    # all_y = torch.tensor(train["y"], device=DEVICE)
     pbar = tqdm.tqdm(enumerate(train_dataloader))
     for step, data in pbar:
-        # batch = np.random.randint(0, len(x), batch_size)
-        # x_ = tok(
-        #     [x[i] for i in batch],
-        #     return_tensors="pt",
-        #     padding=True,
-        #     truncation=True,
-        #     max_length=100,
-        # ).to(DEVICE)
-        # y_ = torch.tensor([y[i] for i in batch], device=DEVICE)
 
         x, y = data
-        # print(x)
-        # print(y)
-        # print(x)
         x_ = tok(
             list(x),
             return_tensors="pt",
@@ -160,26 +137,50 @@ def ft_bert(model, tok, x, y, mode, nbr_batch=5000, batch_size=32, saving_path="
             max_length=100,
         ).to(DEVICE)
         y_ = torch.tensor(y, device=DEVICE)
-        logits = pimped_bert(x_)
-        # logits = model(**x_).logits
+        
+        if mode == "pimped_bert":
+            logits = model(x_) 
+        else:
+            logits = model(**x_).logits
+
         loss = get_loss(logits, y_)
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
         if args.debug:
             break
-        print(loss)
-        # if step % 10 == 0:
-        # with torch.inference_mode():
-        #     total_acc = get_acc(model(**next(val_dataloa)).logits, all_y)
-        # pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
-        # if step % 500 == 0 and saving_path != "":
-        #     val_acc = eval(model, tok, val)
-        #     print(f"\n Validation accuracy: {val_acc}")
-        # torch.save(
-        #         {"model_state_dict": model.state_dict()},
-        #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
-        #     )
+        
+
+
+        if step % 10 == 0:
+            xval, yval = next(iter(eval_dataloader))
+
+            x_val = tok(
+            list(xval),
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=100,
+            ).to(DEVICE)
+            y_val = torch.tensor(yval, device=DEVICE)
+
+            with torch.inference_mode():
+                if mode == "pimped_bert":
+                    eval_logits = model(x_val) 
+                else:
+                    eval_logits = model(**x_val).logits
+
+                total_acc = get_acc(eval_logits, y_val)
+        pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
+
+
+        if step % 200 == 0 and saving_path != "":
+            val_acc = eval(model, tok, val)
+            print(f"\n Validation accuracy: {val_acc}")
+        torch.save(
+                {"model_state_dict": model.state_dict()},
+                saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
+            )
 
     return model
 
@@ -191,10 +192,9 @@ def run_ft(
     train_percentages: List[int],
     val_percentages: List[int],
     modes: List[str],
-    nbr_batch,
     batch_size,
     n_train: int = 1000,
-    n_val: int = 100,
+    n_val: int = 100
 ):
     results = {}
 
@@ -210,17 +210,20 @@ def run_ft(
     for model_name, mode in itertools.product(models, modes):
         print(f"Fine-tuning {model_name} on and mode={mode}")
 
+        if mode not in ["first", "middle", "last", "all", "pimped_bert"]:
+            raise ValueError(mode, "is not a valid argument for argument mode")
+
         model = None
         tokenizer = None
         if "amazon" in train_datasets[0]:
-            model, _ = get_model_and_tokenizer(
+            model, tokenizer = get_model_and_tokenizer(
                 model_name,
                 transformers.AutoModelForSequenceClassification,
                 num_labels=5,
             )
-            _, tokenizer = get_model_and_tokenizer(
-                model_name, transformers.BertTokenizer, num_labels=5
-            )
+            # _, tokenizer = get_model_and_tokenizer(
+            #     model_name, transformers.BertTokenizer, num_labels=5
+            # )
         else:
             model, tokenizer = get_model_and_tokenizer(
                 model_name,
@@ -263,18 +266,15 @@ def run_ft(
                 model = fine_tuned
 
             if args.eval_only == 0:
-                # fine_tuned = ft_bert(
-                #     model, tokenizer, train["x"], train["y"], mode, val, nbr_batch=nbr_batch, batch_size=batch_size, saving_path=path_ckpt[:-3]
-                # )
                 fine_tuned = ft_bert(
                     model,
                     tokenizer,
                     train["x"],
                     train["y"],
+                    val,
                     mode,
-                    nbr_batch=nbr_batch,
                     batch_size=batch_size,
-                    saving_path=path_ckpt[:-3],
+                    saving_path=path_ckpt[:-3]
                 )
                 val_acc = eval(fine_tuned, tokenizer, val, batch_size)
             else:
@@ -301,29 +301,28 @@ def run_ft(
 
 
 if __name__ == "__main__":
-    # train_percentages = [int(k) for k in args.train_percentages.split(",")]
-    # val_percentages = [int(k) for k in args.val_percentages.split(",")]
-    run_ft(
-        ["bert-med"],
-        ["amazon_electronics", "amazon_video"],
-        ["amazon_electronics", "amazon_video"],
-        [95, 5],
-        [95, 5],
-        ["last"],
-        100000,
-        args.batch_size,
-        args.n_train,
-        args.n_val,
-    )
+    train_percentages = [int(k) for k in args.train_percentages.split(",")]
+    val_percentages = [int(k) for k in args.val_percentages.split(",")]
     # run_ft(
-    #     args.model.split(","),
-    #     args.train_dataset.split(","),
-    #     args.val_dataset.split(","),
-    #     train_percentages,
-    #     val_percentages,
-    #     args.mode.split(","),
-    #     args.nbr_batch,
+    #     ["bert-med"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     [95, 5],
+    #     [95, 5],
+    #     ["last"],
+    #     100000,
     #     args.batch_size,
     #     args.n_train,
     #     args.n_val,
     # )
+    run_ft(
+        args.model.split(","),
+        args.train_dataset.split(","),
+        args.val_dataset.split(","),
+        train_percentages,
+        val_percentages,
+        args.mode.split(","),
+        args.batch_size,
+        args.n_train,
+        args.n_val
+    )

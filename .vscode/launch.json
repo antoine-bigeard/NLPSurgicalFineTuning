@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            // "args": ["--model", "bert-med", "--train_percentages", "95,5", "--val_percentages", "95,5", "--train_dataset", "amazon_electronics,amazon_video", "--val_dataset", "amazon_electronics,amazon_video", "--mode", "last,middle,first,all", "--path_ckpt", "results/ft/fine_tuned_bert-med_train_amazon_books_val_amazon_books_train_pct_100_val_pct_100_all.pt", "--nbr_batch", "100000", "--eval_only", "0"],
+            "args": ["--model", "bert-med", "--train_percentages", "95,5", "--val_percentages", "95,5", "--train_dataset", "amazon_electronics,amazon_video", "--val_dataset", "amazon_electronics,amazon_video", "--mode", "last,middle,first,all", "--eval_only", "0"],
             "justMyCode": true
         },
     ]
