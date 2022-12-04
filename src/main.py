@@ -80,7 +80,7 @@ def get_acc(logits, targets):
     return torch.mean(y).item()
 
 
-def eval(model, tok, val_data, batch_size):
+def eval(model, tok, val_data, batch_size, mode):
     eval_dataloader = DataLoader(
         list(zip(val_data["x"], val_data["y"])),
         batch_size=batch_size,
@@ -101,7 +101,13 @@ def eval(model, tok, val_data, batch_size):
         ).to(DEVICE)
         y_ = torch.tensor(y, device=DEVICE)
         with torch.inference_mode():
-            total_acc = get_acc(model(**x_).logits, y_)
+
+            if mode == "pimped_bert":
+                eval_logits = model(x_) 
+            else:
+                eval_logits = model(**x_).logits
+
+            total_acc = get_acc(eval_logits, y_)
             accuracies.append(total_acc)
 
     return np.mean(accuracies)
@@ -123,8 +129,9 @@ def ft_bert(model, tok, x, y, val, mode, batch_size=32, saving_path=""):
     eval_dataloader = DataLoader(
         list(zip(x, y)), batch_size=batch_size, shuffle=True, collate_fn=None
     )
-    
 
+    print(train_dataloader)
+    
     pbar = tqdm.tqdm(enumerate(train_dataloader))
     for step, data in pbar:
 
@@ -151,7 +158,6 @@ def ft_bert(model, tok, x, y, val, mode, batch_size=32, saving_path=""):
             break
         
 
-
         if step % 10 == 0:
             xval, yval = next(iter(eval_dataloader))
 
@@ -175,12 +181,12 @@ def ft_bert(model, tok, x, y, val, mode, batch_size=32, saving_path=""):
 
 
         if step % 200 == 0 and saving_path != "":
-            val_acc = eval(model, tok, val)
+            val_acc = eval(model, tok, val, batch_size, mode)
             print(f"\n Validation accuracy: {val_acc}")
-        torch.save(
-                {"model_state_dict": model.state_dict()},
-                saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
-            )
+            # torch.save(
+            #         {"model_state_dict": model.state_dict()},
+            #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
+            #     )
 
     return model
 
@@ -276,9 +282,9 @@ def run_ft(
                     batch_size=batch_size,
                     saving_path=path_ckpt[:-3]
                 )
-                val_acc = eval(fine_tuned, tokenizer, val, batch_size)
+                val_acc = eval(fine_tuned, tokenizer, val, batch_size, mode)
             else:
-                val_acc = eval(model, tokenizer, val, batch_size)
+                val_acc = eval(model, tokenizer, val, batch_size, mode)
 
             results[description_str] = val_acc
 
