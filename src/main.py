@@ -85,7 +85,6 @@ def eval(model, tok, val_data, batch_size, mode):
         list(zip(val_data["x"], val_data["y"])),
         batch_size=batch_size,
         shuffle=True,
-        collate_fn=None,
     )
 
     pbar = tqdm.tqdm(enumerate(eval_dataloader))
@@ -121,8 +120,8 @@ def ft_bert(model, tok, x, y, val, mode, batch_size=32, saving_path=""):
     else:
         model = SurgicalFineTuningBert(model).to(DEVICE)
         all_params = [p for p in model.parameters() if p.requires_grad]
-        optimizer = torch.optim.Adam(all_params, lr=1e-4)
-
+        # optimizer = torch.optim.Adam(all_params, lr=1e-4)
+        optimizer = torch.optim.Adam(all_params, lr=1e-2)
     train_dataloader = DataLoader(
         list(zip(x, y)), batch_size=batch_size, shuffle=True
     )
@@ -178,9 +177,10 @@ def ft_bert(model, tok, x, y, val, mode, batch_size=32, saving_path=""):
         pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
 
 
-        if step % 200 == 0 and saving_path != "":
+        if step % 20 == 0: #and saving_path != ""
             val_acc = eval(model, tok, val, batch_size, mode)
             print(f"\n Validation accuracy: {val_acc}")
+            print("Alphas: ", model.get_alphas())
             # torch.save(
             #         {"model_state_dict": model.state_dict()},
             #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",

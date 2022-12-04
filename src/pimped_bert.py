@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import copy
-
+import numpy as np
 
 class CombinationBlock(nn.Module):
     """For now just linear combination of the two blocks."""
@@ -53,15 +53,7 @@ class SurgicalFineTuningBert(nn.Module):
         )
         self.alpha_pooler = nn.Parameter(torch.Tensor([0]))
         self.alpha_classifier = nn.Parameter(torch.Tensor([0]))
-        # self.combination_blocks = nn.Sequential(
-        #     *[
-        #         CombinationBlock(
-        #             self.bert_model.bert.encoder.layer[i],
-        #             self.frozen_bert_model.bert.encoder.layer[i],
-        #         )
-        #         for i in range(len(self.bert_model.bert.encoder.layer))
-        #     ]
-        # )
+
 
     def forward(self, x):
         input_ids = x["input_ids"]
@@ -84,6 +76,7 @@ class SurgicalFineTuningBert(nn.Module):
                 ]
             )
         a = torch.sigmoid(self.alpha_pooler)
+        a = self.alpha_pooler
         x = a * self.opti_bert_pooler(x) + (1 - a) * self.frozen_bert_pooler(x)
         x = self.dropout(x)
 
@@ -91,18 +84,13 @@ class SurgicalFineTuningBert(nn.Module):
         x = a * self.opti_bert_classifier(x) + (1 - a) * self.frozen_bert_classifier(x)
 
         return x
-        # print("calling block forward")
-        # x_input, attention_mask = (
-        #     self.embedding_block(x["input_ids"]),
-        #     x["attention_mask"],
-        # )
 
-        # extended_attention_mask = self.bert_model.get_extended_attention_mask(
-        #     attention_mask, x["input_ids"].size()
-        # )
 
-        # # mask = x.attention_mask
-        # return self.combination_blocks(x_input, extended_attention_mask)
+   
 
     def get_alphas(self):
-        return [block.alpha for block in self.combination_blocks]
+        alphas =  [float(a) for a in list(self.alphas_layers)] +[float(self.alpha_pooler)] + [float(self.alpha_classifier)]
+        sigmoid = lambda a: 1/(1 + np.exp(-a))
+
+        return [np.round(sigmoid(a),4) for a in alphas]
+
