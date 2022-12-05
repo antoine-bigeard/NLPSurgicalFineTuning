@@ -19,21 +19,21 @@ import yaml
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model")
-parser.add_argument("--dataset")
-parser.add_argument("--train_percentages", default="100")
-parser.add_argument("--val_percentages", default="100")
-parser.add_argument("--train_dataset", default="amazon_electronics")
-parser.add_argument("--val_dataset", default="amazon_electronics")
-parser.add_argument("--mode", default="all")
+parser.add_argument("--model", default="bert-tiny")
+# parser.add_argument("--dataset", default=["amazon_videos"])
+parser.add_argument("--train_percentages", default="95,5")
+parser.add_argument("--val_percentages", default="95,5")
+parser.add_argument("--train_dataset", default="amazon_electronics,amazon_video")
+parser.add_argument("--val_dataset", default="amazon_electronics,amazon_video")
+parser.add_argument("--mode", default="pimped_bert")
 parser.add_argument("--path_ckpt", default="")
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
 parser.add_argument("--batch_size", default=8, type=int)
 parser.add_argument("--device", default="cpu")
 parser.add_argument("--eval_only", default=0, type=int)
-parser.add_argument("--n_train", default=100000, type=int)
-parser.add_argument("--n_val", default=100000, type=int)
+parser.add_argument("--n_train", default=10000, type=int)
+parser.add_argument("--n_val", default=100, type=int)
 args = parser.parse_args()
 
 
@@ -80,12 +80,7 @@ def get_acc(logits, targets):
     return torch.mean(y).item()
 
 
-def eval(model, tok, val_data, batch_size, mode):
-    eval_dataloader = DataLoader(
-        list(zip(val_data["x"], val_data["y"])),
-        batch_size=batch_size,
-        shuffle=True,
-    )
+def eval(model, tok, eval_dataloader, mode):
 
     pbar = tqdm.tqdm(enumerate(eval_dataloader))
     accuracies = []
@@ -113,7 +108,14 @@ def eval(model, tok, val_data, batch_size, mode):
 
 
 def ft_bert(
-    model, tok, x, y, val, mode, batch_size=32, saving_path="", n_epochs: int = 5
+    model,
+    tok,
+    train_data,
+    val_data,
+    mode,
+    batch_size=32,
+    saving_path="",
+    n_epochs: int = 5,
 ):
     model = copy.deepcopy(model).to(DEVICE)
 
@@ -124,11 +126,17 @@ def ft_bert(
         all_params = [p for p in model.parameters() if p.requires_grad]
         # optimizer = torch.optim.Adam(all_params, lr=1e-4)
         optimizer = torch.optim.Adam(all_params, lr=1e-2)
-    train_dataloader = DataLoader(list(zip(x, y)), batch_size=batch_size)
-    eval_dataloader = DataLoader(list(zip(x, y)), batch_size=batch_size)
+    train_dataloader = DataLoader(
+        list(zip(train_data["x"], train_data["y"])), batch_size=batch_size
+    )
+    eval_dataloader = DataLoader(
+        list(zip(val_data["x"], val_data["y"])), batch_size=batch_size
+    )
+    print(f"Train samples: {len(train_dataloader)}")
+    print(f"Val samples: {len(eval_dataloader)}")
 
     pbar = tqdm.tqdm(enumerate(train_dataloader))
-    for epoch in n_epochs:
+    for epoch in range(n_epochs):
         print(f"Epoch {epoch}")
         for step, data in pbar:
 
@@ -176,13 +184,13 @@ def ft_bert(
             pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
 
             if step % 20 == 0:  # and saving_path != "":
-                val_acc = eval(model, tok, val, batch_size, mode)
+                #     val_acc = eval(model, tok, val, batch_size, mode)
                 # print(f"\n Validation accuracy: {val_acc}")
-                # print("Alphas: ", model.get_alphas())
-                # torch.save(
-                #         {"model_state_dict": model.state_dict()},
-                #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
-                #     )
+                print("Alphas: ", model.get_alphas())
+            # torch.save(
+            #         {"model_state_dict": model.state_dict()},
+            #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
+            #     )
 
     return model
 
@@ -200,7 +208,7 @@ def run_ft(
 ):
     results = {}
 
-    train, val = get_train_val_datasets(
+    train_data, val_data = get_train_val_datasets(
         train_datasets,
         val_datasets,
         train_percentages,
@@ -210,10 +218,10 @@ def run_ft(
     )
 
     # Make sure that we don't have any none. That would need to be fixed at some point!
-    train["x"] = [x for x in train["x"] if x != None]
-    train["y"] = [y for y in train["y"] if y != None]
-    val["x"] = [x for x in val["x"] if x != None]
-    val["y"] = [y for y in val["y"] if y != None]
+    # train["x"] = [x for x in train["x"] if x != None]
+    # train["y"] = [y for y in train["y"] if y != None]
+    # val["x"] = [x for x in val["x"] if x != None]
+    # val["y"] = [y for y in val["y"] if y != None]
 
     for model_name, mode in itertools.product(models, modes):
         print(f"Fine-tuning {model_name} on and mode={mode}")
@@ -277,9 +285,8 @@ def run_ft(
                 fine_tuned = ft_bert(
                     model,
                     tokenizer,
-                    train["x"],
-                    train["y"],
-                    val,
+                    train_data,
+                    val_data,
                     mode,
                     batch_size=batch_size,
                     saving_path=args.path_ckpt[:-3],
@@ -311,25 +318,25 @@ def run_ft(
 if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
+    # run_ft(
+    #     ["bert-med"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     [95, 5],
+    #     [95, 5],
+    #     ["last"],
+    #     args.batch_size,
+    #     args.n_train,
+    #     args.n_val,
+    # )
     run_ft(
-        ["bert-med"],
-        ["amazon_electronics", "amazon_video"],
-        ["amazon_electronics", "amazon_video"],
-        [95, 5],
-        [95, 5],
-        ["last"],
+        args.model.split(","),
+        args.train_dataset.split(","),
+        args.val_dataset.split(","),
+        train_percentages,
+        val_percentages,
+        args.mode.split(","),
         args.batch_size,
         args.n_train,
         args.n_val,
     )
-    # run_ft(
-    #     args.model.split(","),
-    #     args.train_dataset.split(","),
-    #     args.val_dataset.split(","),
-    #     train_percentages,
-    #     val_percentages,
-    #     args.mode.split(","),
-    #     args.batch_size,
-    #     args.n_train,
-    #     args.n_val
-    # )
