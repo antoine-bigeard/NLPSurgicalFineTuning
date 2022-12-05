@@ -195,7 +195,7 @@ def ft_bert(
                     + ".txt",
                     "a")
 
-                    f.write("Epoch" + str(epoch) + ", Step " + str(step) + " | alphas: " + str(alphas) + " , accuracy: " + str(val_acc) + "\n")
+                    f.write("Epoch " + str(epoch) + ", Step " + str(step) + " | alphas: " + str(alphas) + " , accuracy: " + str(round(val_acc,4)) + "\n")
                     f.close()
 
             if step % 50 == 0 and saving_path != "":
@@ -212,7 +212,7 @@ def ft_bert(
                     + args.train_percentages 
                     + ".txt",
                     "a")
-                f.write("Step " + str(step) +  " | Accuracy: " + str(val_acc) + "\n")
+                f.write("Epoch " + str(epoch) + ", Step " + str(step) +  " | Accuracy: " + str(round(val_acc,4)) + "\n")
                 f.close()
 
     return model
