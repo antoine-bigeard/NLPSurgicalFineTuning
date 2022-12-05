@@ -64,9 +64,10 @@ def get_data(dataset: str, num_samples: int):
             .reset_index(drop=True)
         )
         df["star_rating"] -= 1
-        num_samples = df.groupby(["star_rating"])["review_body"].count().min()
+        num_samples_in_df = df.groupby(["star_rating"])["review_body"].count().min()
+        num_samples_final = min(num_samples_in_df, num_samples)
         df = (
-            pd.concat([df[df["star_rating"] == i].iloc[:num_samples] for i in range(5)])
+            pd.concat([df[df["star_rating"] == i].iloc[:num_samples_final] for i in range(5)])
             .sample(frac=1)
             .reset_index(drop=True)
         )
@@ -199,10 +200,20 @@ def get_single_dataset(
         ds,
         train_samples + val_samples,
     )
-    train_data["x"] = df["x"][: n_classes * train_samples]
-    train_data["y"] = df["y"][: n_classes * train_samples]
-    val_data["x"] = df["x"][n_classes * train_samples :]
-    val_data["y"] = df["y"][n_classes * train_samples :]
+    if len(df["x"]) == train_samples + val_samples: # If we had enough datapoints to get the number of samples we want
+        train_data["x"] = df["x"][: n_classes * train_samples]
+        train_data["y"] = df["y"][: n_classes * train_samples]
+        val_data["x"] = df["x"][n_classes * train_samples :]
+        val_data["y"] = df["y"][n_classes * train_samples :]
+    else: # Otherwise, we use % of train samples wanted to make our cut
+        share_train, df_length = train_samples / (train_samples + val_samples), len(df["x"])
+        stop_point = int(share_train * df_length)
+
+        train_data["x"] = df["x"][: stop_point]
+        train_data["y"] = df["y"][: stop_point]
+        val_data["x"] = df["x"][stop_point :]
+        val_data["y"] = df["y"][stop_point :]
+        
 
     return train_data, val_data
 

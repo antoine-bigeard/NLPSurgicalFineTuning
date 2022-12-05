@@ -92,5 +92,5 @@ class SurgicalFineTuningBert(nn.Module):
         alphas =  [float(a) for a in list(self.alphas_layers)] +[float(self.alpha_pooler)] + [float(self.alpha_classifier)]
         sigmoid = lambda a: 1/(1 + np.exp(-a))
 
-        return [np.round(sigmoid(a),4) for a in alphas]
+        return np.round([sigmoid(a) for a in alphas],4)
 
