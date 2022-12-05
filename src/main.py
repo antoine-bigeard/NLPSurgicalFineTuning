@@ -156,30 +156,13 @@ def ft_bert(
             if args.debug:
                 break
 
-            if step % 10 == 0:
-                xval, yval = next(iter(eval_dataloader))
+            if step % 100 == 0:
+                val_acc = eval(model, tok, eval_dataloader, mode)
+                pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
 
-                x_val = tok(
-                    list(xval),
-                    return_tensors="pt",
-                    padding=True,
-                    truncation=True,
-                    max_length=100,
-                ).to(DEVICE)
-                y_val = torch.tensor(yval, device=DEVICE)
-
-                with torch.inference_mode():
-                    if mode == "pimped_bert":
-                        eval_logits = model(x_val)
-                    else:
-                        eval_logits = model(**x_val).logits
-
-                    total_acc = get_acc(eval_logits, y_val)
-            pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
-
-            if step % 20 == 0 and mode == "pimped_bert":
-                alphas = model.get_alphas()
-                print("Alphas: ", alphas, len(alphas))
+                if mode == "pimped_bert":
+                    alphas = model.get_alphas()
+                    print("Alphas: ", alphas)
 
                 f = open(
                     "results/ft/pimped_bert_log"
@@ -225,12 +208,6 @@ def run_ft(
         n_train,
         n_val,
     )
-
-    # Make sure that we don't have any none. That would need to be fixed at some point!
-    # train["x"] = [x for x in train["x"] if x != None]
-    # train["y"] = [y for y in train["y"] if y != None]
-    # val["x"] = [x for x in val["x"] if x != None]
-    # val["y"] = [y for y in val["y"] if y != None]
 
     for model_name, mode in itertools.product(models, modes):
         print(f"Fine-tuning {model_name} on and mode={mode}")
