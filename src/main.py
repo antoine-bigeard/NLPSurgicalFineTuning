@@ -157,12 +157,28 @@ def ft_bert(
             if args.debug:
                 break
 
-            if step % 100 == 0:
+            if step % 10 == 0:
                 val_acc = eval(model, tok, eval_dataloader, mode)
                 pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
 
                 if mode == "pimped_bert":
                     alphas = model.get_alphas()
+                    alphas_opti = torch.ones(len(alphas))
+                    alphas_frozen = torch.zeros(len(alphas))
+                    val_acc_opti=eval(
+                        lambda x: model.forward_alphas(x, alphas=alphas_opti),
+                        tok,
+                        eval_dataloader,
+                        mode
+                    )
+                    val_acc_frozen=eval(
+                        lambda x: model.forward_alphas(x, alphas=alphas_frozen),
+                        tok,
+                        eval_dataloader,
+                        mode
+                    )
+                    pbar.set_description(f"Accuracy opti only: {val_acc_opti:.04f}")
+                    pbar.set_description(f"Accuracy frozen only: {val_acc_frozen:.04f}")
                     print("Alphas: ", alphas)
 
                 f = open(
@@ -308,25 +324,25 @@ def run_ft(
 if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
-    run_ft(
-        ["bert-tiny"],
-        ["amazon_electronics", "amazon_video"],
-        ["amazon_electronics", "amazon_video"],
-        [95, 5],
-        [95, 5],
-        ["pimped_bert"],
-        args.batch_size,
-        args.n_train,
-        args.n_val,
-    )
     # run_ft(
-    #     args.model.split(","),
-    #     args.train_dataset.split(","),
-    #     args.val_dataset.split(","),
-    #     train_percentages,
-    #     val_percentages,
-    #     args.mode.split(","),
+    #     ["bert-tiny"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     [95, 5],
+    #     [95, 5],
+    #     ["pimped_bert"],
     #     args.batch_size,
     #     args.n_train,
     #     args.n_val,
     # )
+    run_ft(
+        args.model.split(","),
+        args.train_dataset.split(","),
+        args.val_dataset.split(","),
+        train_percentages,
+        val_percentages,
+        args.mode.split(","),
+        args.batch_size,
+        args.n_train,
+        args.n_val,
+    )

@@ -85,7 +85,38 @@ class SurgicalFineTuningBert(nn.Module):
 
         return x
 
-    def forward_alphas(self, )
+    def forward_alphas(self, x, alphas):
+        alpha_classifier, alpha_pooler, alphas_layers = alphas[-1], alphas[-2], alphas[:-2]
+
+        input_ids = x["input_ids"]
+        x, attention_mask = (
+            self.embedding_block(input_ids),
+            x["attention_mask"],
+        )
+        extended_attention_mask = self.get_extended_attention_mask(
+            attention_mask, input_ids.size()
+        )
+
+        for i in range(len(self.opti_bert_layers)):
+            a = torch.sigmoid(alphas_layers[i])
+            x = (
+                a
+                * self.opti_bert_layers[i](x, attention_mask=extended_attention_mask)[0]
+                + (1 - a)
+                * self.frozen_bert_layers[i](x, attention_mask=extended_attention_mask)[
+                    0
+                ]
+            )
+            
+        a = torch.sigmoid(alpha_pooler)
+        a = self.alpha_pooler
+        x = a * self.opti_bert_pooler(x) + (1 - a) * self.frozen_bert_pooler(x)
+        x = self.dropout(x)
+
+        a = torch.sigmoid(alpha_classifier)
+        x = a * self.opti_bert_classifier(x) + (1 - a) * self.frozen_bert_classifier(x)
+
+        return x
 
     def get_alphas(self):
         alphas = (
@@ -94,5 +125,5 @@ class SurgicalFineTuningBert(nn.Module):
             + [float(self.alpha_classifier)]
         )
         sigmoid = lambda a: 1 / (1 + np.exp(-a))
-        L = [sigmoid(a) for a in alphas]
-        return [round(x, 4) for x in L]  # PUTAIN DE MERDE POURQUOI CA MARCHE PAS
+        return [round(sigmoid(a), 4) for a in alphas]
+        
