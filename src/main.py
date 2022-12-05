@@ -157,13 +157,14 @@ def ft_bert(
             if args.debug:
                 break
 
-            if step % 5 == 0:
+            if step % 20 == 0:
                 val_acc = eval(model, tok, eval_dataloader, mode)
                 # pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
                 print(f"Fine-tuning val accuracy: {val_acc:.04f}") 
 
                 if mode == "pimped_bert":
                     alphas = model.get_alphas()
+                    print(alphas)
                     alphas_opti = torch.ones(len(alphas))
                     alphas_frozen = torch.zeros(len(alphas))
                     val_acc_opti=eval(
@@ -184,15 +185,17 @@ def ft_bert(
                     print(f"Accuracy frozen only: {val_acc_frozen:.04f}")
                     print("Alphas: ", alphas)
 
-                f = open(
-                    "src/results/ft/pimped_bert_log"
-                    + args.train_dataset
-                    + args.train_percentages
+                    f = open(
+                    "src/results/ft/"
+                    + args.model + "-"
+                    + args.mode + "-"
+                    + args.train_dataset + "-"
+                    + args.train_percentages 
                     + ".txt",
-                    "a",
-                )
-                f.write("Step n°" + str(step) + ", alphas: " + str(alphas) + "\n")
-                f.close()
+                    "a")
+
+                    f.write("Step " + str(step) + "| alphas: " + str(alphas) + " , accuracy: " + str(val_acc) + "\n")
+                    f.close()
 
             if step % 50 == 0 and saving_path != "":
                 # torch.save(
@@ -203,6 +206,16 @@ def ft_bert(
                     {"model_state_dict": model.state_dict()},
                     saving_path + ".pt",
                 )
+                f = open(
+                    "src/results/ft/"
+                    + args.model + "-"
+                    + args.mode + "-"
+                    + args.train_dataset + "-"
+                    + args.train_percentages 
+                    + ".txt",
+                    "a")
+                f.write("Step n°" + str(step) + ", alphas: " + str(alphas) + "\n")
+                f.close()
 
     return model
 
@@ -327,25 +340,25 @@ def run_ft(
 if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
-    run_ft(
-        ["bert-tiny"],
-        ["amazon_electronics", "amazon_video"],
-        ["amazon_electronics", "amazon_video"],
-        [95, 5],
-        [95, 5],
-        ["pimped_bert"],
-        args.batch_size,
-        args.n_train,
-        args.n_val,
-    )
     # run_ft(
-    #     args.model.split(","),
-    #     args.train_dataset.split(","),
-    #     args.val_dataset.split(","),
-    #     train_percentages,
-    #     val_percentages,
-    #     args.mode.split(","),
+    #     ["bert-tiny"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     [95, 5],
+    #     [95, 5],
+    #     ["pimped_bert"],
     #     args.batch_size,
     #     args.n_train,
     #     args.n_val,
     # )
+    run_ft(
+        args.model.split(","),
+        args.train_dataset.split(","),
+        args.val_dataset.split(","),
+        train_percentages,
+        val_percentages,
+        args.mode.split(","),
+        args.batch_size,
+        args.n_train,
+        args.n_val,
+    )

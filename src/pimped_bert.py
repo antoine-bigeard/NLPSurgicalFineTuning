@@ -54,7 +54,6 @@ class SurgicalFineTuningBert(nn.Module):
         self.alphas_layers = nn.Parameter(
             torch.zeros(len(bert_model.bert.encoder.layer))
         )
-        self.alpha_pooler = nn.Parameter(torch.Tensor([0]))
         self.alpha_classifier = nn.Parameter(torch.Tensor([0]))
 
     def forward(self, x):
@@ -77,9 +76,8 @@ class SurgicalFineTuningBert(nn.Module):
                     0
                 ]
             )
-        a = torch.sigmoid(self.alpha_pooler)
-        a = self.alpha_pooler
-        x = a * self.opti_bert_pooler(x) + (1 - a) * self.frozen_bert_pooler(x)
+        
+        x = self.frozen_bert_pooler(x)
         x = self.dropout(x)
 
         a = torch.sigmoid(self.alpha_classifier)
@@ -88,7 +86,7 @@ class SurgicalFineTuningBert(nn.Module):
         return x
 
     def forward_alphas(self, x, alphas):
-        alpha_classifier, alpha_pooler, alphas_layers = alphas[-1], alphas[-2], alphas[:-2]
+        alpha_classifier, alphas_layers = alphas[-1], alphas[:-2]
 
         input_ids, attention_mask = x["input_ids"], x["attention_mask"]
         extended_attention_mask = self.get_extended_attention_mask(
@@ -110,8 +108,7 @@ class SurgicalFineTuningBert(nn.Module):
                 ]
             )
 
-        a = alpha_pooler
-        x = a * self.opti_bert_pooler(x) + (1 - a) * self.frozen_bert_pooler(x)
+        x = self.frozen_bert_pooler(x)
         x = self.dropout(x)
 
         a = alpha_classifier
@@ -122,7 +119,6 @@ class SurgicalFineTuningBert(nn.Module):
     def get_alphas(self):
         alphas = (
             [float(a) for a in list(self.alphas_layers)]
-            + [float(self.alpha_pooler)]
             + [float(self.alpha_classifier)]
         )
         sigmoid = lambda a: 1 / (1 + np.exp(-a))
