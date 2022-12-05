@@ -177,8 +177,10 @@ def ft_bert(
                         eval_dataloader,
                         mode
                     )
-                    pbar.set_description(f"Accuracy opti only: {val_acc_opti:.04f}")
-                    pbar.set_description(f"Accuracy frozen only: {val_acc_frozen:.04f}")
+                    # pbar.set_description(f"Accuracy opti only: {val_acc_opti:.04f}")
+                    # pbar.set_description(f"Accuracy frozen only: {val_acc_frozen:.04f}")
+                    print(f"Accuracy opti only: {val_acc_opti:.04f}")
+                    print(f"Accuracy frozen only: {val_acc_frozen:.04f}")
                     print("Alphas: ", alphas)
 
                 f = open(
