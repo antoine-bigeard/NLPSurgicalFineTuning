@@ -295,7 +295,6 @@ def run_ft(
                     train_dataloader,
                     eval_dataloader,
                     mode,
-                    batch_size=batch_size,
                     saving_path=args.path_ckpt[:-3],
                 )
                 val_acc = eval(fine_tuned, tokenizer, eval_dataloader, mode)
