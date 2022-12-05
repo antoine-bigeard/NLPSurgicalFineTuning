@@ -123,8 +123,8 @@ def ft_bert(
     else:
         model = SurgicalFineTuningBert(model).to(DEVICE)
         all_params = [p for p in model.parameters() if p.requires_grad]
-        # optimizer = torch.optim.Adam(all_params, lr=1e-4)
-        optimizer = torch.optim.Adam(all_params, lr=1e-2)
+        optimizer = torch.optim.Adam(all_params, lr=1e-3)
+        # optimizer = torch.optim.Adam(all_params, lr=1e-2)
 
     print(f"Train samples: {len(train_dataloader)}")
     print(f"Val samples: {len(eval_dataloader)}")
@@ -157,9 +157,10 @@ def ft_bert(
             if args.debug:
                 break
 
-            if step % 10 == 0:
+            if step % 5 == 0:
                 val_acc = eval(model, tok, eval_dataloader, mode)
-                pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
+                # pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
+                print(f"Fine-tuning val accuracy: {val_acc:.04f}") 
 
                 if mode == "pimped_bert":
                     alphas = model.get_alphas()
@@ -190,7 +191,7 @@ def ft_bert(
                     + ".txt",
                     "a",
                 )
-                f.write("Step n°" + str(step) + ", alphas: " + str(alphas))
+                f.write("Step n°" + str(step) + ", alphas: " + str(alphas) + "\n")
                 f.close()
 
             if step % 50 == 0 and saving_path != "":

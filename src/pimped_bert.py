@@ -98,7 +98,7 @@ class SurgicalFineTuningBert(nn.Module):
         )
 
         for i in range(len(self.opti_bert_layers)):
-            a = torch.sigmoid(alphas_layers[i])
+            a = alphas_layers[i]
             x = (
                 a
                 * self.opti_bert_layers[i](x, attention_mask=extended_attention_mask)[0]
@@ -107,13 +107,12 @@ class SurgicalFineTuningBert(nn.Module):
                     0
                 ]
             )
-            
-        a = torch.sigmoid(alpha_pooler)
-        a = self.alpha_pooler
+
+        a = alpha_pooler
         x = a * self.opti_bert_pooler(x) + (1 - a) * self.frozen_bert_pooler(x)
         x = self.dropout(x)
 
-        a = torch.sigmoid(alpha_classifier)
+        a = alpha_classifier
         x = a * self.opti_bert_classifier(x) + (1 - a) * self.frozen_bert_classifier(x)
 
         return x
