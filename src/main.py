@@ -183,10 +183,14 @@ def ft_bert(
                     total_acc = get_acc(eval_logits, y_val)
             pbar.set_description(f"Fine-tuning acc: {total_acc:.04f}")
 
-            if step % 20 == 0:  # and saving_path != "":
-                #     val_acc = eval(model, tok, val, batch_size, mode)
-                # print(f"\n Validation accuracy: {val_acc}")
-                print("Alphas: ", model.get_alphas())
+            if step % 20 == 0 and mode == "pimped_bert":
+                alphas =  model.get_alphas()
+                print("Alphas: ", alphas)
+
+                f = open("results/ft/pimped_bert_log" + args.train_dataset + args.train_percentages + ".txt", "a")
+                f.write("Step n°" + str(step) + ", alphas: " + str(alphas))
+                f.close()
+                
             # torch.save(
             #         {"model_state_dict": model.state_dict()},
             #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",

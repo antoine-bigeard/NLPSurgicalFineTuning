@@ -91,6 +91,5 @@ class SurgicalFineTuningBert(nn.Module):
     def get_alphas(self):
         alphas =  [float(a) for a in list(self.alphas_layers)] +[float(self.alpha_pooler)] + [float(self.alpha_classifier)]
         sigmoid = lambda a: 1/(1 + np.exp(-a))
-
-        return np.round([sigmoid(a) for a in alphas],4)
-
+        L =  [sigmoid(a) for a in alphas]
+        return [round(x,4) for x in L] #PUTAIN DE MERDE POURQUOI CA MARCHE PAS 
