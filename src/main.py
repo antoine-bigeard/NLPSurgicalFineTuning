@@ -34,6 +34,7 @@ parser.add_argument("--device", default="cpu")
 parser.add_argument("--eval_only", default=0, type=int)
 parser.add_argument("--n_train", default=10000, type=int)
 parser.add_argument("--n_val", default=100, type=int)
+parser.add_argument("--n_epochs", default=5, type=int)
 args = parser.parse_args()
 
 
@@ -114,7 +115,7 @@ def ft_bert(
     eval_dataloader,
     mode,
     saving_path="",
-    n_epochs: int = 5,
+    n_epochs=5,
 ):
     model = copy.deepcopy(model).to(DEVICE)
 
@@ -194,14 +195,11 @@ def ft_bert(
                     + ".txt",
                     "a")
 
-                    f.write("Step " + str(step) + "| alphas: " + str(alphas) + " , accuracy: " + str(val_acc) + "\n")
+                    f.write("Epoch" + str(epoch) + ", Step " + str(step) + " | alphas: " + str(alphas) + " , accuracy: " + str(val_acc) + "\n")
                     f.close()
 
             if step % 50 == 0 and saving_path != "":
-                # torch.save(
-                #         {"model_state_dict": model.state_dict()},
-                #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
-                #     )
+
                 torch.save(
                     {"model_state_dict": model.state_dict()},
                     saving_path + ".pt",
@@ -214,7 +212,7 @@ def ft_bert(
                     + args.train_percentages 
                     + ".txt",
                     "a")
-                f.write("Step n°" + str(step) + ", alphas: " + str(alphas) + "\n")
+                f.write("Step " + str(step) +  " | Accuracy: " + str(val_acc) + "\n")
                 f.close()
 
     return model
@@ -228,6 +226,7 @@ def run_ft(
     val_percentages: List[int],
     modes: List[str],
     batch_size,
+    n_epochs,
     n_train: int = 1000,
     n_val: int = 100,
 ):
@@ -311,7 +310,8 @@ def run_ft(
                     train_dataloader,
                     eval_dataloader,
                     mode,
-                    saving_path=args.path_ckpt[:-3],
+                    args.path_ckpt[:-3],
+                    n_epochs
                 )
                 val_acc = eval(fine_tuned, tokenizer, eval_dataloader, mode)
             else:
@@ -359,6 +359,7 @@ if __name__ == "__main__":
         val_percentages,
         args.mode.split(","),
         args.batch_size,
+        args.n_epochs,
         args.n_train,
         args.n_val,
     )
