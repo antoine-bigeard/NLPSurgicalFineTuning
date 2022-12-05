@@ -36,8 +36,6 @@ def dataset2hfname(dataset: str) -> str:
         "amazon_shoes": ("amazon_us_reviews", "Shoes_v1_00"),
         "amazon_grocery": ("amazon_us_reviews", "Grocery_v1_00"),
         "amazon_luggage": ("amazon_us_reviews", "Luggage_v1_00"),
-        
-
         "tweet_eval": ("tweet_eval", "offensive"),
         "civil_comments": ("civil_comments",),
     }[dataset]
@@ -53,16 +51,33 @@ def stop_tokens(tokenizer, stop_string: str = ".") -> int:
 
 def get_data(dataset: str, num_samples: int):
     if "amazon" in dataset:
-        d = datasets.load_dataset(dataset2hfname(dataset)[0], dataset2hfname(dataset)[1])[
-            "train"
-        ]
+        d = datasets.load_dataset(
+            dataset2hfname(dataset)[0], dataset2hfname(dataset)[1]
+        )["train"]
         filter_fn = lambda rows: ["sex" not in r.lower() for r in rows["review_body"]]
         d = d.filter(filter_fn, batched=True, batch_size=None)
-        x = d["review_body"]
-        y = [s - 1 for s in d["star_rating"]]
+        df = (
+            pd.DataFrame(
+                {"star_rating": d["star_rating"], "review_body": d["review_body"]}
+            )
+            .sample(frac=1)
+            .reset_index(drop=True)
+        )
+        df["star_rating"] -= 1
+        num_samples = df.groupby(["star_rating"])["review_body"].count().min()
+        df = (
+            pd.concat([df[df["star_rating"] == i].iloc[:num_samples] for i in range(5)])
+            .sample(frac=1)
+            .reset_index(drop=True)
+        )
+
+        return {"x": list(df["review_body"]), "y": list(df["star_rating"])}
+
         df = defaultdict(lambda: [None] * 5 * num_samples)
+        df["x"]
         counts = defaultdict(int)
         end_idx = 0
+
         for idx in range(len(y)):
             c = counts[y[idx]]
             if c < num_samples:
@@ -78,18 +93,17 @@ def get_data(dataset: str, num_samples: int):
 
         return df, end_idx
     elif dataset == "tweet_eval":
-        d = datasets.load_dataset(dataset2hfname(dataset)[0], dataset2hfname(dataset)[1])[
-            "train"
-        ]
-        filter1 = lambda rows: [r is not None and len(r)>0 for r in rows["text"]]
-        filter2 = lambda rows: [r is not None and r in [0,1] for r in rows["label"]]
+        d = datasets.load_dataset(
+            dataset2hfname(dataset)[0], dataset2hfname(dataset)[1]
+        )["train"]
+        filter1 = lambda rows: [r is not None and len(r) > 0 for r in rows["text"]]
+        filter2 = lambda rows: [r is not None and r in [0, 1] for r in rows["label"]]
         # filter_fn = lambda rows: [clean(r, no_emoji=True) for r in rows["text"]]
         d = d.filter(filter1, batched=True, batch_size=None)
         d = d.filter(filter2, batched=True, batch_size=None)
         x = [r for r in d["text"]]
         y = [int(r) for r in d["label"]]
 
-
         df = defaultdict(lambda: [None] * 2 * num_samples)
         counts = defaultdict(int)
         end_idx = 0
@@ -106,21 +120,18 @@ def get_data(dataset: str, num_samples: int):
         # filter4 = lambda rows: [r is not None and r in [0,1] for r in df["y"]]
         # df = df.filter(filter3, batched=True, batch_size=None)
         # df = df.filter(filter4, batched=True, batch_size=None)
-        
 
         return df, end_idx
     elif dataset == "civil_comments":
-        d = datasets.load_dataset(dataset2hfname(dataset)[0])[
-            "train"
-        ]
-        filter1 = lambda rows: [r is not None and len(r)>0 for r in rows["text"]]
-        filter2 = lambda rows: [r is not None and r>=0.0 for r in rows["toxicity"]]
+        d = datasets.load_dataset(dataset2hfname(dataset)[0])["train"]
+        filter1 = lambda rows: [r is not None and len(r) > 0 for r in rows["text"]]
+        filter2 = lambda rows: [r is not None and r >= 0.0 for r in rows["toxicity"]]
         # filter_fn = lambda rows: [clean(r, no_emoji=True) for r in rows["text"]]
         d = d.filter(filter1, batched=True, batch_size=None)
         d = d.filter(filter2, batched=True, batch_size=None)
         # d = d.filter(filter_fn, batched=True, batch_size=None)
         x = [r for r in d["text"]]
-        y = [int(0) if r<=0.5 else int(1) for r in d["toxicity"]]
+        y = [int(0) if r <= 0.5 else int(1) for r in d["toxicity"]]
 
         df = defaultdict(lambda: [None] * 2 * num_samples)
         counts = defaultdict(int)
@@ -134,17 +145,16 @@ def get_data(dataset: str, num_samples: int):
                 counts[y[idx]] += 1
                 end_idx += 1
 
-
         # filter3 = lambda rows: [r is not None and len(r)>0 for r in df["x"]]
         # filter4 = lambda rows: [r is not None and r in [0,1] for r in df["y"]]
         # df = df.filter(filter3, batched=True, batch_size=None)
         # df = df.filter(filter4, batched=True, batch_size=None)
 
-
         return df, end_idx
 
-    else: ## To be filled with the logic to extract other datasets
+    else:  ## To be filled with the logic to extract other datasets
         raise NotImplementedError()
+
 
 """TO UPDATE FOR NEXT PUSH
 """
@@ -185,7 +195,7 @@ def get_single_dataset(
 
     train_samples = int((n_train * train_pct) / 100)
     val_samples = int((n_val * val_pct) / 100)
-    df, _ = get_data(
+    df = get_data(
         ds,
         train_samples + val_samples,
     )
@@ -241,9 +251,8 @@ def get_train_val_datasets(
         train_data["y"].extend(temp_train["y"])
         val_data["x"].extend(temp_val["x"])
         val_data["y"].extend(temp_val["y"])
-    
-    return train_data, val_data
 
+    return train_data, val_data
 
 
 def get_model_and_tokenizer(model: str, Cls, **model_kwargs):
@@ -263,22 +272,6 @@ def get_model_and_tokenizer(model: str, Cls, **model_kwargs):
             tok.add_special_tokens({"pad_token": "[PAD]"})
             tok.pad_token = "[PAD]"
     return m, tok
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ## GRAVEYARD
@@ -423,8 +416,6 @@ def get_model_and_tokenizer(model: str, Cls, **model_kwargs):
 #         return d[:n_train], d[n_train : n_train + n_val]
 #     else:
 #         raise NotImplementedError(f"{dataset}")
-
-
 
 
 def metric_for_dataset(dataset: str):
