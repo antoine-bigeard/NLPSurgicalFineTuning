@@ -165,7 +165,7 @@ def ft_bert(
                     print("Alphas: ", alphas)
 
                 f = open(
-                    "results/ft/pimped_bert_log"
+                    "src/results/ft/pimped_bert_log"
                     + args.train_dataset
                     + args.train_percentages
                     + ".txt",
@@ -174,14 +174,14 @@ def ft_bert(
                 f.write("Step n°" + str(step) + ", alphas: " + str(alphas))
                 f.close()
 
-            if step % 200 == 0 and saving_path != "":
+            if step % 50 == 0 and saving_path != "":
                 # torch.save(
                 #         {"model_state_dict": model.state_dict()},
                 #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
                 #     )
                 torch.save(
                     {"model_state_dict": model.state_dict()},
-                    saving_path,
+                    saving_path + ".pt",
                 )
 
     return model
@@ -307,25 +307,25 @@ def run_ft(
 if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
-    run_ft(
-        ["bert-med"],
-        ["amazon_electronics", "amazon_video"],
-        ["amazon_electronics", "amazon_video"],
-        [95, 5],
-        [95, 5],
-        ["pimped_bert"],
-        args.batch_size,
-        args.n_train,
-        args.n_val,
-    )
     # run_ft(
-    #     args.model.split(","),
-    #     args.train_dataset.split(","),
-    #     args.val_dataset.split(","),
-    #     train_percentages,
-    #     val_percentages,
-    #     args.mode.split(","),
+    #     ["bert-med"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     ["amazon_electronics", "amazon_video"],
+    #     [95, 5],
+    #     [95, 5],
+    #     ["pimped_bert"],
     #     args.batch_size,
     #     args.n_train,
     #     args.n_val,
     # )
+    run_ft(
+        args.model.split(","),
+        args.train_dataset.split(","),
+        args.val_dataset.split(","),
+        train_percentages,
+        val_percentages,
+        args.mode.split(","),
+        args.batch_size,
+        args.n_train,
+        args.n_val,
+    )
