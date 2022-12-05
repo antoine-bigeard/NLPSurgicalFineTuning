@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import copy
 import numpy as np
 
+
 class CombinationBlock(nn.Module):
     """For now just linear combination of the two blocks."""
 
@@ -29,7 +30,7 @@ class SurgicalFineTuningBert(nn.Module):
         bert_model,
     ) -> None:
         super().__init__()
-        self.bert_model = bert_model
+        self.get_extended_attention_mask = bert_model.get_extended_attention_mask
         # copy the model
 
         self.embedding_block = bert_model.bert.embeddings
@@ -54,6 +55,7 @@ class SurgicalFineTuningBert(nn.Module):
         self.alpha_pooler = nn.Parameter(torch.Tensor([0]))
         self.alpha_classifier = nn.Parameter(torch.Tensor([0]))
 
+        print("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", self.get_alphas())
 
     def forward(self, x):
         input_ids = x["input_ids"]
@@ -61,7 +63,7 @@ class SurgicalFineTuningBert(nn.Module):
             self.embedding_block(input_ids),
             x["attention_mask"],
         )
-        extended_attention_mask = self.bert_model.get_extended_attention_mask(
+        extended_attention_mask = self.get_extended_attention_mask(
             attention_mask, input_ids.size()
         )
 
@@ -85,11 +87,12 @@ class SurgicalFineTuningBert(nn.Module):
 
         return x
 
-
-   
-
     def get_alphas(self):
-        alphas =  [float(a) for a in list(self.alphas_layers)] +[float(self.alpha_pooler)] + [float(self.alpha_classifier)]
-        sigmoid = lambda a: 1/(1 + np.exp(-a))
-        L =  [sigmoid(a) for a in alphas]
-        return [round(x,4) for x in L] #PUTAIN DE MERDE POURQUOI CA MARCHE PAS 
+        alphas = (
+            [float(a) for a in list(self.alphas_layers)]
+            + [float(self.alpha_pooler)]
+            + [float(self.alpha_classifier)]
+        )
+        sigmoid = lambda a: 1 / (1 + np.exp(-a))
+        L = [sigmoid(a) for a in alphas]
+        return [round(x, 4) for x in L]  # PUTAIN DE MERDE POURQUOI CA MARCHE PAS
