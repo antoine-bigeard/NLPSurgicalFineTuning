@@ -110,10 +110,9 @@ def eval(model, tok, eval_dataloader, mode):
 def ft_bert(
     model,
     tok,
-    train_data,
-    val_data,
+    train_dataloader,
+    eval_dataloader,
     mode,
-    batch_size=32,
     saving_path="",
     n_epochs: int = 5,
 ):
@@ -126,12 +125,7 @@ def ft_bert(
         all_params = [p for p in model.parameters() if p.requires_grad]
         # optimizer = torch.optim.Adam(all_params, lr=1e-4)
         optimizer = torch.optim.Adam(all_params, lr=1e-2)
-    train_dataloader = DataLoader(
-        list(zip(train_data["x"], train_data["y"])), batch_size=batch_size
-    )
-    eval_dataloader = DataLoader(
-        list(zip(val_data["x"], val_data["y"])), batch_size=batch_size
-    )
+    
     print(f"Train samples: {len(train_dataloader)}")
     print(f"Val samples: {len(eval_dataloader)}")
 
@@ -190,11 +184,16 @@ def ft_bert(
                 f = open("results/ft/pimped_bert_log" + args.train_dataset + args.train_percentages + ".txt", "a")
                 f.write("Step n°" + str(step) + ", alphas: " + str(alphas))
                 f.close()
-                
-            # torch.save(
-            #         {"model_state_dict": model.state_dict()},
-            #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
-            #     )
+        
+            if step % 200 == 0 and saving_path != "":
+                # torch.save(
+                #         {"model_state_dict": model.state_dict()},
+                #         saving_path + "_val_acc_" + str(round(val_acc,2)) + f"_step_{step}.pt",
+                #     )
+                torch.save(
+                        {"model_state_dict": model.state_dict()},
+                        saving_path,
+                    )
 
     return model
 
@@ -241,9 +240,6 @@ def run_ft(
                 transformers.AutoModelForSequenceClassification,
                 num_labels=5,
             )
-            # _, tokenizer = get_model_and_tokenizer(
-            #     model_name, transformers.BertTokenizer, num_labels=5
-            # )
         else:
             model, tokenizer = get_model_and_tokenizer(
                 model_name,
@@ -285,19 +281,26 @@ def run_ft(
             if repeat > 0:
                 model = fine_tuned
 
+            train_dataloader = DataLoader(
+                list(zip(train_data["x"], train_data["y"])), batch_size=batch_size
+            )
+            eval_dataloader = DataLoader(
+                list(zip(val_data["x"], val_data["y"])), batch_size=batch_size
+            )
+
             if args.eval_only == 0:
                 fine_tuned = ft_bert(
                     model,
                     tokenizer,
-                    train_data,
-                    val_data,
+                    train_dataloader,
+                    eval_dataloader,
                     mode,
                     batch_size=batch_size,
                     saving_path=args.path_ckpt[:-3],
                 )
-                val_acc = eval(fine_tuned, tokenizer, val, batch_size, mode)
+                val_acc = eval(fine_tuned, tokenizer, eval_dataloader, mode)
             else:
-                val_acc = eval(model, tokenizer, val, batch_size, mode)
+                val_acc = eval(model, tokenizer, eval_dataloader, mode)
 
             results[description_str] = val_acc
 
