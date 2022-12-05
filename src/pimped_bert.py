@@ -3,25 +3,27 @@ import torch.nn as nn
 import torch.nn.functional as F
 import copy
 import numpy as np
+from itertools import chain
 
 
-class CombinationBlock(nn.Module):
-    """For now just linear combination of the two blocks."""
 
-    def __init__(self, block, frozen_block) -> None:
-        super().__init__()
-        self.block = block
-        self.frozen_block = frozen_block
-        self.alpha = nn.Parameter(torch.Tensor(0))
+# class CombinationBlock(nn.Module):
+#     """For now just linear combination of the two blocks."""
 
-    def forward(self, x, extented_attention_mask):
-        # return torch.sigmoid(self.alpha) * self.block(x) + (1 - torch.sigmoid(self.alpha)) * self.frozen_block(x)
+#     def __init__(self, block, frozen_block) -> None:
+#         super().__init__()
+#         self.block = block
+#         self.frozen_block = frozen_block
+#         self.alpha = nn.Parameter(torch.Tensor(0))
 
-        return (
-            0.3 * self.block(x, attention_mask=extented_attention_mask)[0]
-            + (1 - 0.3)
-            * self.frozen_block(x, attention_mask=extented_attention_mask)[0]
-        )
+#     def forward(self, x, extented_attention_mask):
+#         # return torch.sigmoid(self.alpha) * self.block(x) + (1 - torch.sigmoid(self.alpha)) * self.frozen_block(x)
+
+#         return (
+#             0.3 * self.block(x, attention_mask=extented_attention_mask)[0]
+#             + (1 - 0.3)
+#             * self.frozen_block(x, attention_mask=extented_attention_mask)[0]
+#         )
 
 
 class SurgicalFineTuningBert(nn.Module):
@@ -33,7 +35,8 @@ class SurgicalFineTuningBert(nn.Module):
         self.get_extended_attention_mask = bert_model.get_extended_attention_mask
         # copy the model
 
-        self.embedding_block = bert_model.bert.embeddings
+        self.opti_embedding_block = bert_model.bert.embeddings
+        self.frozen_embedding_block = copy.deepcopy(self.opti_embedding_block)
         self.opti_bert_layers = bert_model.bert.encoder.layer
         self.frozen_bert_layers = copy.deepcopy(self.opti_bert_layers)
         self.opti_bert_pooler = bert_model.bert.pooler
@@ -41,11 +44,10 @@ class SurgicalFineTuningBert(nn.Module):
         self.opti_bert_classifier = bert_model.classifier
         self.frozen_bert_classifier = copy.deepcopy(self.opti_bert_classifier)
 
-        for param in self.frozen_bert_layers.parameters():
-            param.requires_grad = False
-        for param in self.frozen_bert_pooler.parameters():
-            param.requires_grad = False
-        for param in self.frozen_bert_classifier.parameters():
+        frozen_params = chain(self.frozen_embedding_block.parameters(), self.frozen_bert_layers.parameters(), \
+            self.frozen_bert_pooler.parameters(), self.frozen_bert_classifier.parameters())
+
+        for param in frozen_params:
             param.requires_grad = False
 
         self.dropout = nn.Sequential(bert_model.dropout)
@@ -56,22 +58,22 @@ class SurgicalFineTuningBert(nn.Module):
         self.alpha_classifier = nn.Parameter(torch.Tensor([0]))
 
     def forward(self, x):
-        input_ids = x["input_ids"]
-        x, attention_mask = (
-            self.embedding_block(input_ids),
-            x["attention_mask"],
-        )
+        input_ids, attention_mask = x["input_ids"], x["attention_mask"]
         extended_attention_mask = self.get_extended_attention_mask(
             attention_mask, input_ids.size()
         )
 
+        x_opti, x_frozen = self.opti_embedding_block(input_ids), self.frozen_embedding_block(input_ids)
+
         for i in range(len(self.opti_bert_layers)):
             a = torch.sigmoid(self.alphas_layers[i])
+            if i > 0:
+                x_opti, x_frozen = x, x
             x = (
                 a
-                * self.opti_bert_layers[i](x, attention_mask=extended_attention_mask)[0]
+                * self.opti_bert_layers[i](x_opti, attention_mask=extended_attention_mask)[0]
                 + (1 - a)
-                * self.frozen_bert_layers[i](x, attention_mask=extended_attention_mask)[
+                * self.frozen_bert_layers[i](x_frozen, attention_mask=extended_attention_mask)[
                     0
                 ]
             )
@@ -88,22 +90,22 @@ class SurgicalFineTuningBert(nn.Module):
     def forward_alphas(self, x, alphas):
         alpha_classifier, alpha_pooler, alphas_layers = alphas[-1], alphas[-2], alphas[:-2]
 
-        input_ids = x["input_ids"]
-        x, attention_mask = (
-            self.embedding_block(input_ids),
-            x["attention_mask"],
-        )
+        input_ids, attention_mask = x["input_ids"], x["attention_mask"]
         extended_attention_mask = self.get_extended_attention_mask(
             attention_mask, input_ids.size()
         )
 
+        x_opti, x_frozen = self.opti_embedding_block(input_ids), self.frozen_embedding_block(input_ids)
+
         for i in range(len(self.opti_bert_layers)):
             a = alphas_layers[i]
+            if i > 0:
+                x_opti, x_frozen = x, x
             x = (
                 a
-                * self.opti_bert_layers[i](x, attention_mask=extended_attention_mask)[0]
+                * self.opti_bert_layers[i](x_opti, attention_mask=extended_attention_mask)[0]
                 + (1 - a)
-                * self.frozen_bert_layers[i](x, attention_mask=extended_attention_mask)[
+                * self.frozen_bert_layers[i](x_frozen, attention_mask=extended_attention_mask)[
                     0
                 ]
             )
