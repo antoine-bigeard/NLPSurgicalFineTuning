@@ -86,7 +86,7 @@ class SurgicalFineTuningBert(nn.Module):
         return x
 
     def forward_alphas(self, x, alphas):
-        alpha_classifier, alphas_layers = alphas[-1], alphas[:-2]
+        alpha_classifier, alphas_layers = alphas[-1], alphas[:-1]
 
         input_ids, attention_mask = x["input_ids"], x["attention_mask"]
         extended_attention_mask = self.get_extended_attention_mask(
