@@ -35,7 +35,7 @@ class SurgicalFineTuningBert(nn.Module):
             param.requires_grad = False
 
         self.dropout = nn.Sequential(bert_model.dropout)
-        self.alphas = torch.zeros(len(bert_model.bert.encoder.layer) + 1)
+        self.alphas = nn.Parameter(torch.zeros(len(bert_model.bert.encoder.layer) + 1))
         # self.alphas_layers = nn.Parameter(
         #     torch.zeros(len(bert_model.bert.encoder.layer))
         # )
@@ -116,7 +116,10 @@ class SurgicalFineTuningBert(nn.Module):
         return [round(float(a.sigmoid()), 4) for a in self.alphas]
 
     def normalize_alphas(self, alpha_avg=0.5):
-        self.alphas = (self.alphas.sigmoid() / self.alphas.sigmoid().sum()).logit()
+        with torch.no_grad():
+            self.alphas = nn.Parameter(
+                (self.alphas.sigmoid() / self.alphas.sigmoid().sum()).logit()
+            )
         # n_alphas = 1 + len(self.alphas_layers)
         # total_sum_of_alphas_desired = n_alphas * alpha_avg
 
