@@ -68,7 +68,6 @@ class SurgicalFineTuningBert(nn.Module):
         extended_attention_mask = self.get_extended_attention_mask(
             attention_mask, input_ids.size()
         )
-        self.normalize_alphas()
 
         alphas_layers, alpha_classifier = self.alphas[:-1], self.alphas[-1]
 
@@ -135,10 +134,7 @@ class SurgicalFineTuningBert(nn.Module):
         return x
 
     def get_alphas(self):
-        alphas = [float(a) for a in list(self.alphas_layers)] + [
-            float(self.alpha_classifier)
-        ]
-        return [round(self.sigmoid(a), 4) for a in alphas]
+        return [round(self.sigmoid(float(a)), 4) for a in self.alphas]
 
     def normalize_alphas(self, alpha_avg=0.5):
         self.alphas = (self.alphas.sigmoid() / self.alphas.sigmoid().sum()).logit()
