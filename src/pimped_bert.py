@@ -56,6 +56,9 @@ class SurgicalFineTuningBert(nn.Module):
         )
         self.alpha_classifier = nn.Parameter(torch.Tensor([0]))
 
+    def sigmoid(self, a):
+        return 1/ (1 + np.exp(-a))
+    
     def forward(self, x):
         input_ids, attention_mask = x["input_ids"], x["attention_mask"]
         extended_attention_mask = self.get_extended_attention_mask(
@@ -116,11 +119,38 @@ class SurgicalFineTuningBert(nn.Module):
 
         return x
 
+
     def get_alphas(self):
         alphas = (
             [float(a) for a in list(self.alphas_layers)]
             + [float(self.alpha_classifier)]
         )
-        sigmoid = lambda a: 1 / (1 + np.exp(-a))
-        return [round(sigmoid(a), 4) for a in alphas]
+        return [round(self.sigmoid(a), 4) for a in alphas]
+
+    
+
+    def normalize_alphas(self, alpha_avg  = 0.5):
+        n_alphas = 1 + len(self.alphas_layers)
+        total_sum_of_alphas_desired = n_alphas * alpha_avg
         
+        actual_sum_of_alphas = self.sigmoid(float(self.alpha_classifier))
+        for a in list(self.alphas_layers):
+            actual_sum_of_alphas += self.sigmoid(float(a))
+        
+        norm_factor = actual_sum_of_alphas/ total_sum_of_alphas_desired
+
+        with torch.no_grad():
+            self.alpha_classifier = nn.Parameter(torch.logit(torch.sigmoid(self.alpha_classifier) / norm_factor))
+            for i,a in enumerate(list(self.alphas_layers)):
+                self.alphas_layers[i] = nn.Parameter(torch.logit(torch.sigmoid(a) / norm_factor))
+   
+
+        actual_sum_output = self.sigmoid(float(self.alpha_classifier))
+        for a in list(self.alphas_layers):
+            actual_sum_output += self.sigmoid(float(a))
+
+        print(actual_sum_output, total_sum_of_alphas_desired)
+        
+
+
+

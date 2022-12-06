@@ -158,14 +158,16 @@ def ft_bert(
             if args.debug:
                 break
 
-            if step % 20 == 0:
+            if mode == "pimped_bert":
+                model.normalize_alphas()
+
+            if step % 100 == 0:
                 val_acc = eval(model, tok, eval_dataloader, mode)
                 # pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
                 print(f"Fine-tuning val accuracy: {val_acc:.04f}") 
 
                 if mode == "pimped_bert":
                     alphas = model.get_alphas()
-                    print(alphas)
                     alphas_opti = torch.ones(len(alphas))
                     alphas_frozen = torch.zeros(len(alphas))
                     val_acc_opti=eval(
@@ -180,10 +182,9 @@ def ft_bert(
                         eval_dataloader,
                         mode
                     )
-                    # pbar.set_description(f"Accuracy opti only: {val_acc_opti:.04f}")
-                    # pbar.set_description(f"Accuracy frozen only: {val_acc_frozen:.04f}")
-                    print(f"Accuracy opti only: {val_acc_opti:.04f}")
-                    print(f"Accuracy frozen only: {val_acc_frozen:.04f}")
+
+                    # print(f"Accuracy opti only: {val_acc_opti:.04f}")
+                    # print(f"Accuracy frozen only: {val_acc_frozen:.04f}")
                     print("Alphas: ", alphas)
 
                     f = open(
@@ -198,22 +199,22 @@ def ft_bert(
                     f.write("Epoch " + str(epoch) + ", Step " + str(step) + " | alphas: " + str(alphas) + " , accuracy: " + str(round(val_acc,4)) + "\n")
                     f.close()
 
-            if step % 50 == 0 and saving_path != "":
+        if saving_path != "":
 
-                torch.save(
-                    {"model_state_dict": model.state_dict()},
-                    saving_path + ".pt",
-                )
-                f = open(
-                    "src/results/ft/"
-                    + args.model + "-"
-                    + args.mode + "-"
-                    + args.train_dataset + "-"
-                    + args.train_percentages 
-                    + ".txt",
-                    "a")
-                f.write("Epoch " + str(epoch) + ", Step " + str(step) +  " | Accuracy: " + str(round(val_acc,4)) + "\n")
-                f.close()
+            torch.save(
+                {"model_state_dict": model.state_dict()},
+                saving_path + ".pt",
+            )
+            f = open(
+                "src/results/ft/"
+                + args.model + "-"
+                + args.mode + "-"
+                + args.train_dataset + "-"
+                + args.train_percentages 
+                + ".txt",
+                "a")
+            f.write("Epoch " + str(epoch) + ", Step " + str(step) +  " | Accuracy: " + str(round(val_acc,4)) + "\n")
+            f.close()
 
     return model
 
