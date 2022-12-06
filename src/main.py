@@ -122,6 +122,7 @@ def ft_bert(
     n_epochs=5,
     description_str="",
 ):
+    model = model.to(DEVICE)
 
     print(f"Train samples: {len(train_dataloader)}")
     print(f"Val samples: {len(eval_dataloader)}")
@@ -358,38 +359,38 @@ if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
 
-    run_ft(
-        models=["bert-med"],
-        train_datasets=["amazon_electronics"],
-        val_datasets=["amazon_electronics"],
-        train_percentages=[100],
-        val_percentages=[100],
-        modes=["pimped_bert"],
-        batch_size=128,
-        n_epochs=10,
-        n_train=10000,
-        n_val=10,
-        # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
-        # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
-        save_path_ckpt="ckpts",
-        eval_only=0,
-        learning_rate=1e-3,
-    )
-    # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
     # run_ft(
-    #     models=args.model.split(","),
-    #     train_datasets=args.train_dataset.split(","),
-    #     val_datasets=args.val_dataset.split(","),
-    #     train_percentages=train_percentages,
-    #     val_percentages=val_percentages,
-    #     modes=args.mode.split(","),
-    #     batch_size=args.batch_size,
-    #     n_epochs=args.n_epochs,
-    #     n_train=args.n_train,
-    #     n_val=args.n_val,
-    #     base_model_ckpt=args.base_model_ckpt,
-    #     load_path_ckpt=args.load_path_ckpt,
-    #     save_path_ckpt=args.save_path_ckpt,
-    #     eval_only=args.eval_only,
-    #     learning_rate=args.lr,
+    #     models=["bert-med"],
+    #     train_datasets=["amazon_electronics"],
+    #     val_datasets=["amazon_electronics"],
+    #     train_percentages=[100],
+    #     val_percentages=[100],
+    #     modes=["pimped_bert"],
+    #     batch_size=128,
+    #     n_epochs=10,
+    #     n_train=10000,
+    #     n_val=10,
+    #     # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
+    #     # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
+    #     save_path_ckpt="ckpts",
+    #     eval_only=0,
+    #     learning_rate=1e-3,
     # )
+    # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
+    run_ft(
+        models=args.model.split(","),
+        train_datasets=args.train_dataset.split(","),
+        val_datasets=args.val_dataset.split(","),
+        train_percentages=train_percentages,
+        val_percentages=val_percentages,
+        modes=args.mode.split(","),
+        batch_size=args.batch_size,
+        n_epochs=args.n_epochs,
+        n_train=args.n_train,
+        n_val=args.n_val,
+        base_model_ckpt=args.base_model_ckpt,
+        load_path_ckpt=args.load_path_ckpt,
+        save_path_ckpt=args.save_path_ckpt,
+        eval_only=args.eval_only,
+        learning_rate=args.lr,
+    )
