@@ -130,7 +130,7 @@ def ft_bert(
     print(f"Val samples: {len(eval_dataloader)}")
 
     for epoch in range(n_epochs):
-        pbar = tqdm.tqdm(enumerate(train_dataloader))
+        pbar = tqdm.tqdm(enumerate(train_dataloader), disable=True)
         print(f"Epoch {epoch}")
         for step, data in pbar:
 
@@ -181,8 +181,8 @@ def ft_bert(
                         mode,
                     )
 
-                    # print(f"Accuracy opti only: {val_acc_opti:.04f}")
-                    # print(f"Accuracy frozen only: {val_acc_frozen:.04f}")
+                    print(f"Accuracy opti only: {val_acc_opti:.04f}")
+                    print(f"Accuracy frozen only: {val_acc_frozen:.04f}")
                     print("Alphas: ", alphas)
 
                     f = open(
@@ -203,7 +203,7 @@ def ft_bert(
                     )
                     f.close()
 
-        if saving_path != "":
+        if saving_path != "" and saving_path != None:
 
                 torch.save(
                     {"model_state_dict": model.state_dict()},
@@ -374,37 +374,38 @@ if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
 
-    run_ft(
-        models=["bert-med"],
-        train_datasets=["amazon_electronics"],
-        val_datasets=["amazon_electronics"],
-        train_percentages=[100],
-        val_percentages=[100],
-        modes=["pimped_bert"],
-        batch_size=4,
-        n_epochs=1,
-        n_train=10,
-        n_val=1,
-        base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
-        load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
-        save_path_ckpt="ckpts",
-        eval_only=0,
-        learning_rate=1e-3,
-    )
     # run_ft(
-    #     models=args.model.split(","),
-    #     train_datasets=args.train_dataset.split(","),
-    #     val_datasets=args.val_dataset.split(","),
-    #     train_percentages=train_percentages,
-    #     val_percentages=val_percentages,
-    #     modes=args.mode.split(","),
-    #     batch_size=args.batch_size,
-    #     n_epochs=args.n_epochs,
-    #     n_train=args.n_train,
-    #     n_val=args.n_val,
-    #     base_model_ckpt=args.base_model_ckpt,
-    #     load_path_ckpt=args.load_path_ckpt,
-    #     save_path_ckpt=args.save_path_ckpt,
-    #     eval_only=args.eval_only,
-    #     learning_rate=args.lr,
+    #     models=["bert-tiny"],
+    #     train_datasets=["amazon_books"],
+    #     val_datasets=["amazon_books"],
+    #     train_percentages=[100],
+    #     val_percentages=[100],
+    #     modes=["pimped_bert"],
+    #     batch_size=8,
+    #     n_epochs=10,
+    #     n_train=10000000,
+    #     n_val=10000,
+    #     base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
+    #     load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
+    #     save_path_ckpt="ckpts",
+    #     eval_only=0,
+    #     learning_rate=1e-3,
     # )
+
+    run_ft(
+        models=args.model.split(","),
+        train_datasets=args.train_dataset.split(","),
+        val_datasets=args.val_dataset.split(","),
+        train_percentages=train_percentages,
+        val_percentages=val_percentages,
+        modes=args.mode.split(","),
+        batch_size=args.batch_size,
+        n_epochs=args.n_epochs,
+        n_train=args.n_train,
+        n_val=args.n_val,
+        base_model_ckpt=args.base_model_ckpt,
+        load_path_ckpt=args.load_path_ckpt,
+        save_path_ckpt=args.save_path_ckpt,
+        eval_only=args.eval_only,
+        learning_rate=args.lr,
+    )

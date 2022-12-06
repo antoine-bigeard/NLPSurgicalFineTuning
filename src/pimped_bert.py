@@ -139,17 +139,11 @@ class SurgicalFineTuningBert(nn.Module):
         
         norm_factor = actual_sum_of_alphas/ total_sum_of_alphas_desired
 
-        with torch.no_grad():
-            self.alpha_classifier = nn.Parameter(torch.logit(torch.sigmoid(self.alpha_classifier) / norm_factor))
-            for i,a in enumerate(list(self.alphas_layers)):
-                self.alphas_layers[i] = nn.Parameter(torch.logit(torch.sigmoid(a) / norm_factor))
+        # with torch.no_grad():
+        #     self.alpha_classifier = nn.Parameter(torch.logit(torch.sigmoid(self.alpha_classifier) / norm_factor))
+        #     for i,a in enumerate(list(self.alphas_layers)):
+        #         self.alphas_layers[i] = nn.Parameter(torch.logit(torch.sigmoid(a) / norm_factor))
    
-
-        actual_sum_output = self.sigmoid(float(self.alpha_classifier))
-        for a in list(self.alphas_layers):
-            actual_sum_output += self.sigmoid(float(a))
-
-        print(actual_sum_output, total_sum_of_alphas_desired)
         
 
 
