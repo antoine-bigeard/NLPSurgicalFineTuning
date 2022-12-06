@@ -60,9 +60,6 @@ class SurgicalFineTuningBert(nn.Module):
         # )
         # self.alpha_classifier = nn.Parameter(torch.Tensor([0]))
 
-    def sigmoid(self, a):
-        return 1 / (1 + np.exp(-a))
-
     def forward(self, x):
         input_ids, attention_mask = x["input_ids"], x["attention_mask"]
         extended_attention_mask = self.get_extended_attention_mask(
@@ -134,7 +131,8 @@ class SurgicalFineTuningBert(nn.Module):
         return x
 
     def get_alphas(self):
-        return [round(self.sigmoid(float(a)), 4) for a in self.alphas]
+        # return [round(self.sigmoid(float(a)), 4) for a in self.alphas]
+        return [round(float(a.sigmoid()), 4) for a in self.alphas]
 
     def normalize_alphas(self, alpha_avg=0.5):
         self.alphas = (self.alphas.sigmoid() / self.alphas.sigmoid().sum()).logit()

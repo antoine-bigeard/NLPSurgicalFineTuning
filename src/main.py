@@ -32,7 +32,7 @@ parser.add_argument("--load_path_ckpt", default=None)
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
 parser.add_argument("--batch_size", default=8, type=int)
-parser.add_argument("--device", default="cpu")
+parser.add_argument("--device", default="cuda")
 parser.add_argument("--eval_only", default=0, type=int)
 parser.add_argument("--n_train", default=10000, type=int)
 parser.add_argument("--n_val", default=100, type=int)
@@ -122,15 +122,15 @@ def ft_bert(
     n_epochs=5,
     description_str="",
 ):
-    model = copy.deepcopy(model).to(DEVICE)
 
     print(f"Train samples: {len(train_dataloader)}")
     print(f"Val samples: {len(eval_dataloader)}")
 
     for epoch in range(n_epochs):
-        pbar = tqdm.tqdm(enumerate(train_dataloader), disable=True)
+        pbar = tqdm.tqdm(enumerate(train_dataloader), disable=False)
         print(f"Epoch {epoch}")
         for step, data in pbar:
+            print(step)
 
             x, y = data
             x_ = tok(
@@ -157,7 +157,7 @@ def ft_bert(
             if mode == "pimped_bert":
                 model.normalize_alphas()
 
-            if step % 100 == 0:
+            if step % 5 == 0:
                 val_acc = eval(model, tok, eval_dataloader, mode)
                 # pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
                 print(f"Fine-tuning val accuracy: {val_acc:.04f}")
@@ -365,10 +365,10 @@ if __name__ == "__main__":
         train_percentages=[100],
         val_percentages=[100],
         modes=["pimped_bert"],
-        batch_size=8,
+        batch_size=128,
         n_epochs=10,
         n_train=10000,
-        n_val=100,
+        n_val=10,
         # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
         # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
         save_path_ckpt="ckpts",
