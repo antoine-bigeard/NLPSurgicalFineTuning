@@ -3,3 +3,5 @@
 src/hw3_code.zip
 results/
 venv/
+ckpts/
+src/results
