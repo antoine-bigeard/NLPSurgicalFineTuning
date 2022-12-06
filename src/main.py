@@ -364,7 +364,7 @@ if __name__ == "__main__":
         val_datasets=["amazon_electronics"],
         train_percentages=[100],
         val_percentages=[100],
-        modes=["pimped_bert"],
+        modes=["all"],
         batch_size=8,
         n_epochs=10,
         n_train=10000,

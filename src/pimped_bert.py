@@ -6,25 +6,6 @@ import numpy as np
 from itertools import chain
 
 
-# class CombinationBlock(nn.Module):
-#     """For now just linear combination of the two blocks."""
-
-#     def __init__(self, block, frozen_block) -> None:
-#         super().__init__()
-#         self.block = block
-#         self.frozen_block = frozen_block
-#         self.alpha = nn.Parameter(torch.Tensor(0))
-
-#     def forward(self, x, extented_attention_mask):
-#         # return torch.sigmoid(self.alpha) * self.block(x) + (1 - torch.sigmoid(self.alpha)) * self.frozen_block(x)
-
-#         return (
-#             0.3 * self.block(x, attention_mask=extented_attention_mask)[0]
-#             + (1 - 0.3)
-#             * self.frozen_block(x, attention_mask=extented_attention_mask)[0]
-#         )
-
-
 class SurgicalFineTuningBert(nn.Module):
     def __init__(
         self,
