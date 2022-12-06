@@ -102,7 +102,7 @@ clipper = WeightClipper()
 
 def eval(model, tok, eval_dataloader, mode):
 
-    pbar = tqdm.tqdm(enumerate(eval_dataloader))
+    pbar = tqdm.tqdm(enumerate(eval_dataloader), disable=False)
     accuracies = []
     for step, data in pbar:
         x, y = data
@@ -144,10 +144,15 @@ def ft_bert(
     print(f"Val samples: {len(eval_dataloader)}")
 
     for epoch in range(n_epochs):
-        pbar = tqdm.tqdm(enumerate(train_dataloader), disable=False)
         print(f"Epoch {epoch}")
+        pbar = tqdm.tqdm(
+            enumerate(train_dataloader),
+            position=0,
+            leave=True,
+            disable=False,
+            total=len(train_dataloader),
+        )
         for step, data in pbar:
-            print(step)
 
             x, y = data
             x_ = tok(
@@ -175,7 +180,7 @@ def ft_bert(
 
             #     model.normalize_alphas()
 
-            if step % 5 == 0:
+            if step % 50 == 0:
                 val_acc = eval(model, tok, eval_dataloader, mode)
                 # pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
                 print(f"Fine-tuning val accuracy: {val_acc:.04f}")
@@ -201,6 +206,8 @@ def ft_bert(
                     print(f"Accuracy frozen only: {val_acc_frozen:.04f}")
                     print("Alphas: ", alphas)
 
+                    train_acc = get_acc(logits, y_)
+
                     f = open(
                         f"src/results/ft/{description_str}.txt",
                         "a",
@@ -215,6 +222,8 @@ def ft_bert(
                         + str(alphas)
                         + " , accuracy: "
                         + str(round(val_acc, 4))
+                        + " , train_accuracy: "
+                        + str(round(float(train_acc), 4))
                         + "\n"
                     )
                     f.close()
@@ -225,7 +234,9 @@ def ft_bert(
                 {"model_state_dict": model.state_dict()},
                 os.path.join(saving_path, description_str + ".pt"),
             )
-            with open(os.path.join("src/results/ft/", description_str + ".txt")) as f:
+            with open(
+                os.path.join("src/results/ft/", description_str + ".txt"), "a"
+            ) as f:
                 f.write(
                     "Epoch "
                     + str(epoch)
@@ -377,16 +388,16 @@ if __name__ == "__main__":
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
 
     run_ft(
-        models=["bert-med"],
-        train_datasets=["amazon_electronics"],
-        val_datasets=["amazon_electronics"],
+        models=["bert-tiny"],
+        train_datasets=["amazon_video"],
+        val_datasets=["amazon_video"],
         train_percentages=[100],
         val_percentages=[100],
         modes=["pimped_bert"],
         batch_size=128,
         n_epochs=10,
         n_train=10000,
-        n_val=10,
+        n_val=100,
         # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
         # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
         save_path_ckpt="ckpts",
