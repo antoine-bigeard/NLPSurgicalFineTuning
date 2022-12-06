@@ -113,13 +113,14 @@ class SurgicalFineTuningBert(nn.Module):
 
     def get_alphas(self):
         # return [round(self.sigmoid(float(a)), 4) for a in self.alphas]
-        return [round(float(a.sigmoid()), 4) for a in self.alphas]
+        return [float(a.sigmoid()) for a in self.alphas]
+        # return [round(float(a.sigmoid()), 4) for a in self.alphas]
 
     def normalize_alphas(self, alpha_avg=0.5):
-        with torch.no_grad():
-            self.alphas = nn.Parameter(
-                (self.alphas.sigmoid() / self.alphas.sigmoid().sum()).logit()
-            )
+        # with torch.no_grad():
+        self.alphas = nn.Parameter(
+            (self.alphas.sigmoid() / self.alphas.sigmoid().sum()).logit()
+        )
         # n_alphas = 1 + len(self.alphas_layers)
         # total_sum_of_alphas_desired = n_alphas * alpha_avg
 

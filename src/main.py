@@ -84,6 +84,22 @@ def get_acc(logits, targets):
     return torch.mean(y).item()
 
 
+class WeightClipper(object):
+    def __init__(self, frequency=5):
+        self.frequency = frequency
+
+    def __call__(self, module):
+        # filter the variables to get the ones you want
+        if hasattr(module, "alphas"):
+            w = module.alphas.data
+            # w = w.clamp(-1, 1)
+            w = (w.sigmoid() / w.sigmoid().sum()).logit()
+            module.alphas.data = w
+
+
+clipper = WeightClipper()
+
+
 def eval(model, tok, eval_dataloader, mode):
 
     pbar = tqdm.tqdm(enumerate(eval_dataloader))
@@ -151,12 +167,13 @@ def ft_bert(
             loss = get_loss(logits, y_)
             loss.backward()
             optimizer.step()
+            if mode == "pimped_bert":
+                model.apply(clipper)
             optimizer.zero_grad()
             if args.debug:
                 break
 
-            if mode == "pimped_bert":
-                model.normalize_alphas()
+            #     model.normalize_alphas()
 
             if step % 5 == 0:
                 val_acc = eval(model, tok, eval_dataloader, mode)
@@ -359,38 +376,38 @@ if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
 
-    # run_ft(
-    #     models=["bert-med"],
-    #     train_datasets=["amazon_electronics"],
-    #     val_datasets=["amazon_electronics"],
-    #     train_percentages=[100],
-    #     val_percentages=[100],
-    #     modes=["pimped_bert"],
-    #     batch_size=128,
-    #     n_epochs=10,
-    #     n_train=10000,
-    #     n_val=10,
-    #     # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
-    #     # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
-    #     save_path_ckpt="ckpts",
-    #     eval_only=0,
-    #     learning_rate=1e-3,
-    # )
-    # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
     run_ft(
-        models=args.model.split(","),
-        train_datasets=args.train_dataset.split(","),
-        val_datasets=args.val_dataset.split(","),
-        train_percentages=train_percentages,
-        val_percentages=val_percentages,
-        modes=args.mode.split(","),
-        batch_size=args.batch_size,
-        n_epochs=args.n_epochs,
-        n_train=args.n_train,
-        n_val=args.n_val,
-        base_model_ckpt=args.base_model_ckpt,
-        load_path_ckpt=args.load_path_ckpt,
-        save_path_ckpt=args.save_path_ckpt,
-        eval_only=args.eval_only,
-        learning_rate=args.lr,
+        models=["bert-med"],
+        train_datasets=["amazon_electronics"],
+        val_datasets=["amazon_electronics"],
+        train_percentages=[100],
+        val_percentages=[100],
+        modes=["pimped_bert"],
+        batch_size=128,
+        n_epochs=10,
+        n_train=10000,
+        n_val=10,
+        # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
+        # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
+        save_path_ckpt="ckpts",
+        eval_only=0,
+        learning_rate=1e-3,
     )
+    # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
+    # run_ft(
+    #     models=args.model.split(","),
+    #     train_datasets=args.train_dataset.split(","),
+    #     val_datasets=args.val_dataset.split(","),
+    #     train_percentages=train_percentages,
+    #     val_percentages=val_percentages,
+    #     modes=args.mode.split(","),
+    #     batch_size=args.batch_size,
+    #     n_epochs=args.n_epochs,
+    #     n_train=args.n_train,
+    #     n_val=args.n_val,
+    #     base_model_ckpt=args.base_model_ckpt,
+    #     load_path_ckpt=args.load_path_ckpt,
+    #     save_path_ckpt=args.save_path_ckpt,
+    #     eval_only=args.eval_only,
+    #     learning_rate=args.lr,
+    # )
