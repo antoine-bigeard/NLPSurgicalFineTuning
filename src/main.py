@@ -37,7 +37,7 @@ parser.add_argument("--eval_only", default=0, type=int)
 parser.add_argument("--n_train", default=10000, type=int)
 parser.add_argument("--n_val", default=100, type=int)
 parser.add_argument("--n_epochs", default=5, type=int)
-parser.add_argument("--lr", default=1e-3, type=float)
+parser.add_argument("--lr", default=1e-4, type=float)
 parser.add_argument("--idxs_alphas", default="0,0,0,1,1", type=str)
 parser.add_argument("--val_freq", default=50, type=int)
 args = parser.parse_args()
@@ -163,7 +163,6 @@ def ft_bert(
     train_dataloader,
     eval_dataloader,
     mode,
-    saving_path="",
     n_epochs=5,
     description_str="",
     val_freq=50,
@@ -311,24 +310,24 @@ def ft_bert(
                     )
                     f.close()
 
-        if saving_path != "" and saving_path is not None:
+        
 
-            torch.save(
-                {"model_state_dict": model.state_dict()},
-                os.path.join(log_dir, f"ckpt_epoch_{epoch}_step_{step}" + ".pt"),
-            )
-            f = open(
-                f"src/results/ft/{description_str}.txt",
-                "a",
-            )
-            f.write(
-                "End of epoch "
-                + str(epoch)
-                + " | Accuracy: "
-                + str(round(val_acc, 4))
-                + "\n"
-            )
-            f.close()
+        torch.save(
+            {"model_state_dict": model.state_dict()},
+            os.path.join(log_dir, f"ckpt_epoch_{epoch}_step_{step}" + ".pt"),
+        )
+        f = open(
+            f"src/results/ft/{description_str}.txt",
+            "a",
+        )
+        f.write(
+            "End of epoch "
+            + str(epoch)
+            + " | Accuracy: "
+            + str(round(val_acc, 4))
+            + "\n"
+        )
+        f.close()
 
     return model
 
@@ -473,26 +472,26 @@ def run_ft(
 if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
-    ixs_alphas = [int(k) for k in args.idxs_alphas.split(",")]
+    idxs_alphas = [int(k) for k in args.idxs_alphas.split(",")]
 
-    run_ft(
-        models=["bert-small"],
-        train_datasets=["amazon_video"],
-        val_datasets=["amazon_video"],
-        train_percentages=[100],
-        val_percentages=[100],
-        modes=["last"],
-        batch_size=128,
-        n_epochs=10,
-        n_train=1,
-        n_val=1,
-        # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
-        # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
-        eval_only=0,
-        learning_rate=1e-4,
-        idxs_alphas=[1, 1, 1, 1, 1],
-        val_freq=50,
-    )
+    # run_ft(
+    #     models=["bert-small"],
+    #     train_datasets=["amazon_video"],
+    #     val_datasets=["amazon_video"],
+    #     train_percentages=[100],
+    #     val_percentages=[100],
+    #     modes=["last"],
+    #     batch_size=128,
+    #     n_epochs=10,
+    #     n_train=1,
+    #     n_val=1,
+    #     # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
+    #     # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
+    #     eval_only=0,
+    #     learning_rate=1e-4,
+    #     idxs_alphas=[1, 1, 1, 1, 1],
+    #     val_freq=50,
+    # )
     # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
     # run_ft(
     #     models=["bert-med"],
@@ -513,21 +512,21 @@ if __name__ == "__main__":
     #     val_freq=50,
     # )
     # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
-    # run_ft(
-    #     models=args.model.split(","),
-    #     train_datasets=args.train_dataset.split(","),
-    #     val_datasets=args.val_dataset.split(","),
-    #     train_percentages=train_percentages,
-    #     val_percentages=val_percentages,
-    #     modes=args.mode.split(","),
-    #     batch_size=args.batch_size,
-    #     n_epochs=args.n_epochs,
-    #     n_train=args.n_train,
-    #     n_val=args.n_val,
-    #     base_model_ckpt=args.base_model_ckpt,
-    #     load_path_ckpt=args.load_path_ckpt,
-    #     eval_only=args.eval_only,
-    #     learning_rate=args.lr,
-    #     idxs_alphas=idxs_alphas,
-    #     val_freq=int(args.val_freq),
-    # )
+    run_ft(
+        models=args.model.split(","),
+        train_datasets=args.train_dataset.split(","),
+        val_datasets=args.val_dataset.split(","),
+        train_percentages=train_percentages,
+        val_percentages=val_percentages,
+        modes=args.mode.split(","),
+        batch_size=args.batch_size,
+        n_epochs=args.n_epochs,
+        n_train=args.n_train,
+        n_val=args.n_val,
+        base_model_ckpt=args.base_model_ckpt,
+        load_path_ckpt=args.load_path_ckpt,
+        eval_only=args.eval_only,
+        learning_rate=args.lr,
+        idxs_alphas=args.idxs_alphas,
+        val_freq=int(args.val_freq),
+    )
