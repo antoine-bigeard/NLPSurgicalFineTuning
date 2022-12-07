@@ -17,12 +17,14 @@ values_fine_tune_all = [0.4909999966621399,0.48900002241134644,0.460000008344650
 values_fine_tune_first = [0.4909999966621399,0.5060000419616699,0.5060000419616699,0.47200003266334534,0.5220000147819519]
 values_fine_tune_middle = [0.4909999966621399,0.48500001430511475,0.5120000243186951,0.4780000150203705,0.5070000290870667]
 values_fine_tune_last = [0.4909999966621399,0.5190000534057617,0.5040000081062317,0.5049999952316284,0.4710000157356262]
+values_fine_tune_TEST = [0.5909999966621399,0.6190000534057617,0.6040000081062317,0.5049999952316284,0.4710000157356262]
 
-plt.plot(percentages_val_only,values_eval_only, c= "b", label="Eval only")
-plt.plot(percentages_fine_tunning,values_fine_tune_all, c= "r", label="Fine-tune all")
-plt.plot(percentages_fine_tunning,values_fine_tune_first, c= "m", label="Fine-tune first")
-plt.plot(percentages_fine_tunning,values_fine_tune_middle, c= "y", label="Fine-tune middle")
-plt.plot(percentages_fine_tunning,values_fine_tune_last, c= "c", label="Fine-tune last")
+plt.plot(percentages_val_only,values_eval_only, c= "royalblue", label="Eval only")
+plt.plot(percentages_fine_tunning,values_fine_tune_all, c= "firebrick", label="Fine-tune all")
+plt.plot(percentages_fine_tunning,values_fine_tune_first, c= "forestgreen", label="Fine-tune first")
+plt.plot(percentages_fine_tunning,values_fine_tune_middle, c= "gold", label="Fine-tune middle")
+plt.plot(percentages_fine_tunning,values_fine_tune_last, c= "darkorange", label="Fine-tune last")
+plt.plot(percentages_fine_tunning,values_fine_tune_TEST, c= "darkorchid", label="Fine-tune pimped bert")
 plt.xlabel("% of amazon books dataset (= 100 - % of amazon movies) in the eval set")
 plt.ylabel("Validation accuracy of bert-tiny trained on amazon books")
 plt.legend()
