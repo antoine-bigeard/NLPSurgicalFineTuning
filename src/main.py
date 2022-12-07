@@ -18,7 +18,7 @@ import tqdm
 import yaml
 from torch.utils.tensorboard import SummaryWriter
 
-
+torch.set_num_threads(10)
 parser = argparse.ArgumentParser()
 parser.add_argument("--model", default="bert-tiny")
 # parser.add_argument("--dataset", default=["amazon_videos"])
@@ -32,7 +32,7 @@ parser.add_argument("--load_path_ckpt", default=None)
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
 parser.add_argument("--batch_size", default=8, type=int)
-parser.add_argument("--device", default="cuda")
+parser.add_argument("--device", default="cuda:1")
 parser.add_argument("--eval_only", default=0, type=int)
 parser.add_argument("--n_train", default=10000, type=int)
 parser.add_argument("--n_val", default=100, type=int)
@@ -44,6 +44,8 @@ args = parser.parse_args()
 
 
 DEVICE = torch.device(args.device)
+
+torch.manual_seed(123)
 
 
 def parameters_to_fine_tune(model: nn.Module, mode: str, idxs_alphas=None):
@@ -461,6 +463,7 @@ def run_ft(
             )
             val_acc = eval_model(fine_tuned, tokenizer, eval_dataloader, mode)
         else:
+            model = model.to(DEVICE)
             val_acc = eval_model(model, tokenizer, eval_dataloader, mode)
 
         results[description_str] = val_acc
@@ -482,24 +485,24 @@ if __name__ == "__main__":
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
     idxs_alphas = [int(k) for k in args.idxs_alphas.split(",")]
 
-    run_ft(
-        models=["bert-small"],
-        train_datasets=["amazon_video"],
-        val_datasets=["amazon_video"],
-        train_percentages=[100],
-        val_percentages=[100],
-        modes=["all"],
-        batch_size=128,
-        n_epochs=4,
-        n_train=200,
-        n_val=10,
-        # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
-        # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
-        eval_only=0,
-        learning_rate=1e-4,
-        idxs_alphas=[1, 1, 1, 1, 1],
-        val_freq=50,
-    )
+    # run_ft(
+    #     models=["bert-small"],
+    #     train_datasets=["amazon_books", "amazon_video"],
+    #     val_datasets=["amazon_books", "amazon_video"],
+    #     train_percentages=[80, 20],
+    #     val_percentages=[80, 20],
+    #     modes=["all"],
+    #     batch_size=128,
+    #     n_epochs=4,
+    #     n_train=200,
+    #     n_val=10,
+    #     # base_model_ckpt="logs/all_fine_tuned_books/ckpt_epoch_0_step_1250.pt",
+    #     load_path_ckpt="logs/all_fine_tuned_books/ckpt_epoch_0_step_1250.pt",
+    #     eval_only=1,
+    #     learning_rate=1e-4,
+    #     idxs_alphas=[1, 1, 1, 1, 1],
+    #     val_freq=50,
+    # )
     # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
     # run_ft(
     #     models=["bert-med"],
@@ -520,21 +523,21 @@ if __name__ == "__main__":
     #     val_freq=50,
     # )
     # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
-    # run_ft(
-    #     models=args.model.split(","),
-    #     train_datasets=args.train_dataset.split(","),
-    #     val_datasets=args.val_dataset.split(","),
-    #     train_percentages=train_percentages,
-    #     val_percentages=val_percentages,
-    #     modes=args.mode.split(","),
-    #     batch_size=args.batch_size,
-    #     n_epochs=args.n_epochs,
-    #     n_train=args.n_train,
-    #     n_val=args.n_val,
-    #     base_model_ckpt=args.base_model_ckpt,
-    #     load_path_ckpt=args.load_path_ckpt,
-    #     eval_only=args.eval_only,
-    #     learning_rate=args.lr,
-    #     idxs_alphas=args.idxs_alphas,
-    #     val_freq=int(args.val_freq),
-    # )
+    run_ft(
+        models=args.model.split(","),
+        train_datasets=args.train_dataset.split(","),
+        val_datasets=args.val_dataset.split(","),
+        train_percentages=train_percentages,
+        val_percentages=val_percentages,
+        modes=args.mode.split(","),
+        batch_size=args.batch_size,
+        n_epochs=args.n_epochs,
+        n_train=args.n_train,
+        n_val=args.n_val,
+        base_model_ckpt=args.base_model_ckpt,
+        load_path_ckpt=args.load_path_ckpt,
+        eval_only=args.eval_only,
+        learning_rate=args.lr,
+        idxs_alphas=args.idxs_alphas,
+        val_freq=int(args.val_freq),
+    )
