@@ -19,6 +19,10 @@ def read_yaml_config_file(path_config: str):
         return yaml.load(conf, yaml.FullLoader)
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
 def model2hfname(model: str) -> str:
     return {
         "bert-tiny": "prajjwal1/bert-tiny",
