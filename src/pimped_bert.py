@@ -35,7 +35,17 @@ class SurgicalFineTuningBert(nn.Module):
             param.requires_grad = False
 
         self.dropout = nn.Sequential(bert_model.dropout)
-        self.alphas = nn.Parameter(torch.zeros(len(bert_model.bert.encoder.layer) + 1))
+        if (
+            "bert-small" in bert_model.name_or_path
+            or "bert-med" in bert_model.name_or_path
+        ):
+            self.alphas = nn.Parameter(
+                torch.zeros(len(bert_model.bert.encoder.layer) + 3)
+            )
+        else:
+            self.alphas = nn.Parameter(
+                torch.zeros(len(bert_model.bert.encoder.layer) + 1)
+            )
         # self.alphas_layers = nn.Parameter(
         #     torch.zeros(len(bert_model.bert.encoder.layer))
         # )
@@ -47,28 +57,45 @@ class SurgicalFineTuningBert(nn.Module):
             attention_mask, input_ids.size()
         )
 
-        alphas_layers, alpha_classifier = self.alphas[:-1], self.alphas[-1]
+        alpha_embeddings, alphas_layers, alpha_pooler, alpha_classifier = (
+            self.alphas[0],
+            self.alphas[1:-2],
+            self.alphas[-2],
+            self.alphas[-1],
+        )
 
-        x_opti, x_frozen = self.opti_embedding_block(
-            input_ids
-        ), self.frozen_embedding_block(input_ids)
+        # x_opti, x_frozen = self.opti_embedding_block(
+        #     input_ids
+        # ), self.frozen_embedding_block(input_ids)
+
+        a = alpha_embeddings.sigmoid()
+        x = a * self.opti_embedding_block(x) + (1 - a) * self.frozen_embedding_block(x)
 
         for i in range(len(self.opti_bert_layers)):
             a = alphas_layers[i].sigmoid()
             if i > 0:
                 x_opti, x_frozen = x, x
+            # x = (
+            #     a
+            #     * self.opti_bert_layers[i](
+            #         x_opti, attention_mask=extended_attention_mask
+            #     )[0]
+            #     + (1 - a)
+            #     * self.frozen_bert_layers[i](
+            #         x_frozen, attention_mask=extended_attention_mask
+            #     )[0]
+            # )
             x = (
                 a
-                * self.opti_bert_layers[i](
-                    x_opti, attention_mask=extended_attention_mask
-                )[0]
+                * self.opti_bert_layers[i](x, attention_mask=extended_attention_mask)[0]
                 + (1 - a)
-                * self.frozen_bert_layers[i](
-                    x_frozen, attention_mask=extended_attention_mask
-                )[0]
+                * self.frozen_bert_layers[i](x, attention_mask=extended_attention_mask)[
+                    0
+                ]
             )
 
-        x = self.frozen_bert_pooler(x)
+        a = alpha_pooler.sigmoid()
+        x = a * self.opti_bert_pooler(x) + (1 - a) * self.frozen_bert_pooler(x)
         x = self.dropout(x)
 
         a = alpha_classifier.sigmoid()
@@ -77,36 +104,51 @@ class SurgicalFineTuningBert(nn.Module):
         return x
 
     def forward_alphas(self, x, alphas):
-        alphas_layers, alpha_classifier = alphas[:-1], alphas[-1]
+        alpha_embeddings, alphas_layers, alpha_pooler, alpha_classifier = (
+            alphas[0],
+            alphas[1:-2],
+            alphas[-2],
+            alphas[-1],
+        )
 
         input_ids, attention_mask = x["input_ids"], x["attention_mask"]
         extended_attention_mask = self.get_extended_attention_mask(
             attention_mask, input_ids.size()
         )
 
-        x_opti, x_frozen = self.opti_embedding_block(
-            input_ids
-        ), self.frozen_embedding_block(input_ids)
+        a = alpha_embeddings.sigmoid()
+        x = a * self.opti_embedding_block(x) + (1 - a) * self.frozen_embedding_block(x)
+
+        # x_opti, x_frozen = self.opti_embedding_block(
+        #     input_ids
+        # ), self.frozen_embedding_block(input_ids)
 
         for i in range(len(self.opti_bert_layers)):
-            a = alphas_layers[i]
-            if i > 0:
-                x_opti, x_frozen = x, x
+            a = alphas_layers[i].sigmoid()
+            # x = (
+            #     a
+            #     * self.opti_bert_layers[i](
+            #         x_opti, attention_mask=extended_attention_mask
+            #     )[0]
+            #     + (1 - a)
+            #     * self.frozen_bert_layers[i](
+            #         x_frozen, attention_mask=extended_attention_mask
+            #     )[0]
+            # )
             x = (
                 a
-                * self.opti_bert_layers[i](
-                    x_opti, attention_mask=extended_attention_mask
-                )[0]
+                * self.opti_bert_layers[i](x, attention_mask=extended_attention_mask)[0]
                 + (1 - a)
-                * self.frozen_bert_layers[i](
-                    x_frozen, attention_mask=extended_attention_mask
-                )[0]
+                * self.frozen_bert_layers[i](x, attention_mask=extended_attention_mask)[
+                    0
+                ]
             )
 
-        x = self.frozen_bert_pooler(x)
+        a = alpha_pooler.sigmoid()
+        x = a * self.opti_bert_pooler(x) + (1 - a) * self.frozen_bert_pooler(x)
         x = self.dropout(x)
 
-        a = alpha_classifier
+        a = alpha_classifier.sigmoid()
         x = a * self.opti_bert_classifier(x) + (1 - a) * self.frozen_bert_classifier(x)
 
         return x
