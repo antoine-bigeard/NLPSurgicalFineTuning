@@ -153,6 +153,7 @@ def ft_bert(
     saving_path="",
     n_epochs=5,
     description_str="",
+    val_freq=50,
 ):
     model = model.to(DEVICE)
 
@@ -160,8 +161,10 @@ def ft_bert(
     if os.path.isdir(log_dir):
         existing_experiments = os.listdir(log_dir)
         if len(log_dir) > 0:
+            last_version = max([exp.split("_")[-1] for exp in existing_experiments])
             log_dir = os.path.join(
-                log_dir, f"version_{existing_experiments[-1].split('_')[-1]}"
+                log_dir,
+                f"version_{int(last_version)+1}",
             )
     else:
         log_dir = os.path.join(log_dir, "version_0")
@@ -212,7 +215,7 @@ def ft_bert(
 
             #     model.normalize_alphas()
 
-            if step % 10 == 0:
+            if step % val_freq == 0:
                 val_acc = eval_model(model, tok, eval_dataloader, mode)
                 torch.save(
                     {"model_state_dict": model.state_dict()},
@@ -334,6 +337,7 @@ def run_ft(
     eval_only=0,
     learning_rate=1e-3,
     idxs_alphas=None,
+    val_freq=50,
 ):
     results = {}
 
@@ -435,6 +439,7 @@ def run_ft(
                 save_path_ckpt,
                 n_epochs,
                 description_str=description_str,
+                val_freq=val_freq,
             )
             val_acc = eval_model(fine_tuned, tokenizer, eval_dataloader, mode)
         else:
@@ -471,7 +476,7 @@ if __name__ == "__main__":
         val_datasets=["amazon_video"],
         train_percentages=[100],
         val_percentages=[100],
-        modes=["all_but_embeds_pooler"],
+        modes=["all"],
         batch_size=128,
         n_epochs=10,
         n_train=10000,
@@ -480,7 +485,7 @@ if __name__ == "__main__":
         # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
         save_path_ckpt="ckpts",
         eval_only=0,
-        learning_rate=1e-3,
+        learning_rate=1e-4,
         idxs_alphas=[1, 1, 1, 1, 1],
     )
     # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
