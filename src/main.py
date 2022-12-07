@@ -63,14 +63,27 @@ def parameters_to_fine_tune(model: nn.Module, mode: str, idxs_alphas=None):
         params = [p for p in model.parameters() if p.requires_grad]
         return params
     elif mode == "last":
+        if "bert-small" in model.name_or_path:
+            return (
+                list(model.bert.encoder.layer[-1].parameters())
+                + list(model.bert.pooler.parameters())
+                + list(model.classifier.parameters())
+            )
         return list(model.bert.encoder.layer[-2:].parameters())
     elif mode == "first":
+        if "bert-small" in model.name_or_path:
+            return list(model.bert.embeddings.parameters()) + list(
+                model.bert.encoder.layer[0].parameters()
+            )
         return list(model.bert.encoder.layer[:2].parameters())
     elif mode == "middle":
+        if "bert-small" in model.name_or_path:
+            return list(model.bert.encoder.layer[1:3].parameters())
         n_trans = len(model.bert.encoder.layer)
         return list(
             model.bert.encoder.layer[n_trans // 2 - 1 : n_trans // 2 + 1].parameters()
         )
+
     elif mode == "all_but_embeds_pooler" and idxs_alphas is not None:
         parameters = []
         for key, value in model.named_parameters():
@@ -468,7 +481,7 @@ if __name__ == "__main__":
         val_datasets=["amazon_video"],
         train_percentages=[100],
         val_percentages=[100],
-        modes=["all"],
+        modes=["last"],
         batch_size=128,
         n_epochs=10,
         n_train=1,

@@ -25,6 +25,7 @@ def model2hfname(model: str) -> str:
         "bert-mini": "prajjwal1/bert-mini",
         "bert-small": "prajjwal1/bert-small",
         "bert-med": "prajjwal1/bert-medium",
+        "bert-large": "prajjwal1/bert-large",
     }[model]
 
 
