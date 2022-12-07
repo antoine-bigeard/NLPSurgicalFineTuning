@@ -16,6 +16,7 @@ from torch.utils.data import DataLoader
 import transformers
 import tqdm
 import yaml
+from torch.utils.tensorboard import SummaryWriter
 
 
 parser = argparse.ArgumentParser()
@@ -38,13 +39,14 @@ parser.add_argument("--n_train", default=10000, type=int)
 parser.add_argument("--n_val", default=100, type=int)
 parser.add_argument("--n_epochs", default=5, type=int)
 parser.add_argument("--lr", default=1e-3, type=float)
+parser.add_argument("--idxs_alphas", default="0,0,0,1,1", type=str)
 args = parser.parse_args()
 
 
 DEVICE = torch.device(args.device)
 
 
-def parameters_to_fine_tune(model: nn.Module, mode: str):
+def parameters_to_fine_tune(model: nn.Module, mode: str, idxs_alphas=None):
     """
     Select the parameters in `model` that should be fine-tuned in mode `mode`.
 
@@ -69,6 +71,20 @@ def parameters_to_fine_tune(model: nn.Module, mode: str):
         return list(
             model.bert.encoder.layer[n_trans // 2 - 1 : n_trans // 2 + 1].parameters()
         )
+    elif mode == "all_but_embeds_pooler" and idxs_alphas is not None:
+        parameters = []
+        for key, value in model.named_parameters():
+            if "embeddings" not in key and "pooler" not in key:
+                parameters.append(value)
+        return parameters
+    elif mode == "perso" and idxs_alphas is not None:
+        parameters = []
+        for i in idxs_alphas[:-1]:
+            if i:
+                parameters += list(model.bert.encoder.layer[i].parameters())
+        if idxs_alphas[-1]:
+            parameters += list(model.classifier.parameters())
+        return parameters
     else:
         raise NotImplementedError()
 
@@ -100,9 +116,9 @@ class WeightClipper(object):
 clipper = WeightClipper()
 
 
-def eval(model, tok, eval_dataloader, mode):
+def eval_model(model, tok, eval_dataloader, mode):
 
-    pbar = tqdm.tqdm(enumerate(eval_dataloader), disable=False)
+    pbar = tqdm.tqdm(enumerate(eval_dataloader), disable=True)
     accuracies = []
     for step, data in pbar:
         x, y = data
@@ -140,6 +156,18 @@ def ft_bert(
 ):
     model = model.to(DEVICE)
 
+    log_dir = os.path.join("logs", description_str)
+    if os.path.isdir(log_dir):
+        existing_experiments = os.listdir(log_dir)
+        if len(log_dir) > 0:
+            log_dir = os.path.join(
+                log_dir, f"version_{existing_experiments[-1].split('_')[-1]}"
+            )
+    else:
+        log_dir = os.path.join(log_dir, "version_0")
+
+    writer = SummaryWriter(log_dir=log_dir)
+
     print(f"Train samples: {len(train_dataloader)}")
     print(f"Val samples: {len(eval_dataloader)}")
 
@@ -170,6 +198,10 @@ def ft_bert(
                 logits = model(**x_).logits
 
             loss = get_loss(logits, y_)
+            writer.add_scalar("loss/loss", loss, step + epoch * len(train_dataloader))
+            writer.add_scalar(
+                "acc/train", get_acc(logits, y_), step + epoch * len(train_dataloader)
+            )
             loss.backward()
             optimizer.step()
             if mode == "pimped_bert":
@@ -180,37 +212,53 @@ def ft_bert(
 
             #     model.normalize_alphas()
 
-            if step % 500 == 0:
-                val_acc = eval(model, tok, eval_dataloader, mode)
+            if step % 10 == 0:
+                val_acc = eval_model(model, tok, eval_dataloader, mode)
                 torch.save(
                     {"model_state_dict": model.state_dict()},
                     os.path.join(saving_path, description_str + ".pt"),
                 )
                 # pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
-                print(f"Fine-tuning val accuracy: {val_acc:.04f}")
+                # print(f"Fine-tuning val accuracy: {val_acc:.04f}")
+                writer.add_scalar(
+                    "acc/val", val_acc, step + epoch * len(train_dataloader)
+                )
 
                 if mode == "pimped_bert":
                     alphas = model.get_alphas()
                     alphas_opti = torch.ones(len(alphas))
                     alphas_frozen = torch.zeros(len(alphas))
-                    val_acc_opti = eval(
+                    val_acc_opti = eval_model(
                         lambda x: model.forward_alphas(x, alphas=alphas_opti),
                         tok,
                         eval_dataloader,
                         mode,
                     )
-                    val_acc_frozen = eval(
+                    val_acc_frozen = eval_model(
                         lambda x: model.forward_alphas(x, alphas=alphas_frozen),
                         tok,
                         eval_dataloader,
                         mode,
                     )
 
-                    print(f"Accuracy opti only: {val_acc_opti:.04f}")
-                    print(f"Accuracy frozen only: {val_acc_frozen:.04f}")
-                    print("Alphas: ", alphas)
+                    writer.add_scalar(
+                        "acc/val_opti",
+                        val_acc_opti,
+                        step + epoch * len(train_dataloader),
+                    )
+                    writer.add_scalar(
+                        "acc/val_frozen",
+                        val_acc_frozen,
+                        step + epoch * len(train_dataloader),
+                    )
 
-                    train_acc = get_acc(logits, y_)
+                    # print(f"Accuracy opti only: {val_acc_opti:.04f}")
+                    # print(f"Accuracy frozen only: {val_acc_frozen:.04f}")
+                    # print("Alphas: ", alphas)
+                    for i, a in enumerate(alphas):
+                        writer.add_scalar(
+                            f"alphas/{i}", a, step + epoch * len(train_dataloader)
+                        )
 
                     f = open(
                         f"src/results/ft/{description_str}.txt",
@@ -226,8 +274,23 @@ def ft_bert(
                         + str(alphas)
                         + " , accuracy: "
                         + str(round(val_acc, 4))
-                        + " , train_accuracy: "
-                        + str(round(float(train_acc), 4))
+                        + "\n"
+                    )
+                    f.close()
+
+                else:
+                    f = open(
+                        f"src/results/ft/{description_str}.txt",
+                        "a",
+                    )
+
+                    f.write(
+                        "Epoch "
+                        + str(epoch)
+                        + ", Step "
+                        + str(step)
+                        + " , accuracy: "
+                        + str(round(val_acc, 4))
                         + "\n"
                     )
                     f.close()
@@ -270,6 +333,7 @@ def run_ft(
     save_path_ckpt=None,
     eval_only=0,
     learning_rate=1e-3,
+    idxs_alphas=None,
 ):
     results = {}
 
@@ -285,7 +349,15 @@ def run_ft(
     for model_name, mode in itertools.product(models, modes):
         print(f"Fine-tuning {model_name} on and mode={mode}")
 
-        if mode not in ["first", "middle", "last", "all", "pimped_bert"]:
+        if mode not in [
+            "first",
+            "middle",
+            "last",
+            "all",
+            "pimped_bert",
+            "perso",
+            "all_but_embeds_pooler",
+        ]:
             raise ValueError(mode, "is not a valid argument for argument mode")
 
         tokenizer = None
@@ -341,7 +413,8 @@ def run_ft(
                 ckpt = torch.load(load_path_ckpt)
                 model.load_state_dict(ckpt["model_state_dict"])
             optimizer = torch.optim.Adam(
-                parameters_to_fine_tune(model, mode), lr=learning_rate
+                parameters_to_fine_tune(model, mode, idxs_alphas=idxs_alphas),
+                lr=learning_rate,
             )
 
         train_dataloader = DataLoader(
@@ -363,9 +436,9 @@ def run_ft(
                 n_epochs,
                 description_str=description_str,
             )
-            val_acc = eval(fine_tuned, tokenizer, eval_dataloader, mode)
+            val_acc = eval_model(fine_tuned, tokenizer, eval_dataloader, mode)
         else:
-            val_acc = eval(model, tokenizer, eval_dataloader, mode)
+            val_acc = eval_model(model, tokenizer, eval_dataloader, mode)
 
         results[description_str] = val_acc
 
@@ -390,14 +463,15 @@ def run_ft(
 if __name__ == "__main__":
     train_percentages = [int(k) for k in args.train_percentages.split(",")]
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
+    ixs_alphas = [int(k) for k in args.idxs_alphas.split(",")]
 
     run_ft(
-        models=["bert-tiny"],
+        models=["bert-small"],
         train_datasets=["amazon_video"],
         val_datasets=["amazon_video"],
         train_percentages=[100],
         val_percentages=[100],
-        modes=["pimped_bert"],
+        modes=["all_but_embeds_pooler"],
         batch_size=128,
         n_epochs=10,
         n_train=10000,
@@ -407,6 +481,7 @@ if __name__ == "__main__":
         save_path_ckpt="ckpts",
         eval_only=0,
         learning_rate=1e-3,
+        idxs_alphas=[1, 1, 1, 1, 1],
     )
     # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
     # run_ft(
@@ -425,22 +500,24 @@ if __name__ == "__main__":
     #     save_path_ckpt="ckpts",
     #     eval_only=0,
     #     learning_rate=1e-3,
+    #     idxs_alphas=None,
     # )
     # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
-    run_ft(
-        models=args.model.split(","),
-        train_datasets=args.train_dataset.split(","),
-        val_datasets=args.val_dataset.split(","),
-        train_percentages=train_percentages,
-        val_percentages=val_percentages,
-        modes=args.mode.split(","),
-        batch_size=args.batch_size,
-        n_epochs=args.n_epochs,
-        n_train=args.n_train,
-        n_val=args.n_val,
-        base_model_ckpt=args.base_model_ckpt,
-        load_path_ckpt=args.load_path_ckpt,
-        save_path_ckpt=args.save_path_ckpt,
-        eval_only=args.eval_only,
-        learning_rate=args.lr,
-    )
+    # run_ft(
+    #     models=args.model.split(","),
+    #     train_datasets=args.train_dataset.split(","),
+    #     val_datasets=args.val_dataset.split(","),
+    #     train_percentages=train_percentages,
+    #     val_percentages=val_percentages,
+    #     modes=args.mode.split(","),
+    #     batch_size=args.batch_size,
+    #     n_epochs=args.n_epochs,
+    #     n_train=args.n_train,
+    #     n_val=args.n_val,
+    #     base_model_ckpt=args.base_model_ckpt,
+    #     load_path_ckpt=args.load_path_ckpt,
+    #     save_path_ckpt=args.save_path_ckpt,
+    #     eval_only=args.eval_only,
+    #     learning_rate=args.lr,
+    #     idxs_alphas=idxs_alphas,
+    # )

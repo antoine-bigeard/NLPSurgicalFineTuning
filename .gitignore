@@ -5,3 +5,4 @@ results/
 venv/
 src/nohup.out
 ckpts/
+logs/
