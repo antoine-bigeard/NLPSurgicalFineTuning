@@ -1,0 +1,6 @@
+- eval only : c="royalblue"
+- first: c = "forestgreen"
+- mid: c = "gold"
+- last: c = "darkorange"
+- all: c = "firebrick"
+- pimped_bert: c = "darkorchid"
