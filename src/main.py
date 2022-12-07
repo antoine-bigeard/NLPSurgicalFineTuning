@@ -2,7 +2,7 @@ import sys
 
 sys.path.insert(0, ".")
 from src.pimped_bert import *
-
+from src.utils import count_parameters
 from utils import *
 
 import argparse
