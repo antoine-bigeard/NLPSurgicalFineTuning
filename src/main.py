@@ -28,7 +28,6 @@ parser.add_argument("--train_dataset", default="amazon_electronics,amazon_video"
 parser.add_argument("--val_dataset", default="amazon_electronics,amazon_video")
 parser.add_argument("--mode", default="pimped_bert")
 parser.add_argument("--base_model_ckpt", default=None)
-parser.add_argument("--save_path_ckpt", default=None)
 parser.add_argument("--load_path_ckpt", default=None)
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--repeats", default=1, type=int)
@@ -40,6 +39,7 @@ parser.add_argument("--n_val", default=100, type=int)
 parser.add_argument("--n_epochs", default=5, type=int)
 parser.add_argument("--lr", default=1e-3, type=float)
 parser.add_argument("--idxs_alphas", default="0,0,0,1,1", type=str)
+parser.add_argument("--val_freq", default=50, type=int)
 args = parser.parse_args()
 
 
@@ -219,7 +219,7 @@ def ft_bert(
                 val_acc = eval_model(model, tok, eval_dataloader, mode)
                 torch.save(
                     {"model_state_dict": model.state_dict()},
-                    os.path.join(saving_path, description_str + ".pt"),
+                    os.path.join(log_dir, f"ckpt_epoch_{epoch}_step_{step}" + ".pt"),
                 )
                 # pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
                 # print(f"Fine-tuning val accuracy: {val_acc:.04f}")
@@ -302,7 +302,7 @@ def ft_bert(
 
             torch.save(
                 {"model_state_dict": model.state_dict()},
-                os.path.join(saving_path, description_str + ".pt"),
+                os.path.join(log_dir, f"ckpt_epoch_{epoch}_step_{step}" + ".pt"),
             )
             f = open(
                 f"src/results/ft/{description_str}.txt",
@@ -333,7 +333,6 @@ def run_ft(
     n_val: int = 100,
     base_model_ckpt=None,
     load_path_ckpt=None,
-    save_path_ckpt=None,
     eval_only=0,
     learning_rate=1e-3,
     idxs_alphas=None,
@@ -436,7 +435,6 @@ def run_ft(
                 train_dataloader,
                 eval_dataloader,
                 mode,
-                save_path_ckpt,
                 n_epochs,
                 description_str=description_str,
                 val_freq=val_freq,
@@ -450,12 +448,6 @@ def run_ft(
         question = "ft"
         if not os.path.exists(f"results/{question}"):
             os.makedirs(f"results/{question}")
-
-        if eval_only == 0:
-            torch.save(
-                {"model_state_dict": fine_tuned.state_dict()},
-                os.path.join(save_path_ckpt, description_str + ".pt"),
-            )
 
         print(results)
 
@@ -479,14 +471,14 @@ if __name__ == "__main__":
         modes=["all"],
         batch_size=128,
         n_epochs=10,
-        n_train=10000,
-        n_val=100,
+        n_train=1,
+        n_val=1,
         # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
         # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
-        save_path_ckpt="ckpts",
         eval_only=0,
         learning_rate=1e-4,
         idxs_alphas=[1, 1, 1, 1, 1],
+        val_freq=50,
     )
     # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
     # run_ft(
@@ -502,10 +494,10 @@ if __name__ == "__main__":
     #     n_val=10,
     #     # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
     #     # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
-    #     save_path_ckpt="ckpts",
     #     eval_only=0,
     #     learning_rate=1e-3,
     #     idxs_alphas=None,
+    #     val_freq=50,
     # )
     # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
     # run_ft(
@@ -521,8 +513,8 @@ if __name__ == "__main__":
     #     n_val=args.n_val,
     #     base_model_ckpt=args.base_model_ckpt,
     #     load_path_ckpt=args.load_path_ckpt,
-    #     save_path_ckpt=args.save_path_ckpt,
     #     eval_only=args.eval_only,
     #     learning_rate=args.lr,
     #     idxs_alphas=idxs_alphas,
+    #     val_freq=int(args.val_freq),
     # )
