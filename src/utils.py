@@ -96,10 +96,6 @@ def get_data(dataset: str, num_samples: int):
                 counts[y[idx]] += 1
                 end_idx += 1
 
-        # filter3 = lambda rows: [r is not None and len(r)>0 for r in df["x"]]
-        # filter4 = lambda rows: [r is not None and r in [0,1] for r in df["y"]]
-        # df = df.filter(filter3, batched=True, batch_size=None)
-        # df = df.filter(filter4, batched=True, batch_size=None)
 
         return df, end_idx
     elif dataset == "tweet_eval":
@@ -126,20 +122,14 @@ def get_data(dataset: str, num_samples: int):
                 counts[y[idx]] += 1
                 end_idx += 1
 
-        # filter3 = lambda rows: [r is not None and len(r)>0 for r in df["x"]]
-        # filter4 = lambda rows: [r is not None and r in [0,1] for r in df["y"]]
-        # df = df.filter(filter3, batched=True, batch_size=None)
-        # df = df.filter(filter4, batched=True, batch_size=None)
 
         return df, end_idx
     elif dataset == "civil_comments":
         d = datasets.load_dataset(dataset2hfname(dataset)[0])["train"]
         filter1 = lambda rows: [r is not None and len(r) > 0 for r in rows["text"]]
         filter2 = lambda rows: [r is not None and r >= 0.0 for r in rows["toxicity"]]
-        # filter_fn = lambda rows: [clean(r, no_emoji=True) for r in rows["text"]]
         d = d.filter(filter1, batched=True, batch_size=None)
         d = d.filter(filter2, batched=True, batch_size=None)
-        # d = d.filter(filter_fn, batched=True, batch_size=None)
         x = [r for r in d["text"]]
         y = [int(0) if r <= 0.5 else int(1) for r in d["toxicity"]]
 
@@ -151,14 +141,8 @@ def get_data(dataset: str, num_samples: int):
             if c < num_samples:
                 df["x"][c * 2 + y[idx]] = x[idx]
                 df["y"][c * 2 + y[idx]] = y[idx]
-                # print(df["x"][c * 2 + y[idx]], df["y"][c * 2 + y[idx]])
                 counts[y[idx]] += 1
                 end_idx += 1
-
-        # filter3 = lambda rows: [r is not None and len(r)>0 for r in df["x"]]
-        # filter4 = lambda rows: [r is not None and r in [0,1] for r in df["y"]]
-        # df = df.filter(filter3, batched=True, batch_size=None)
-        # df = df.filter(filter4, batched=True, batch_size=None)
 
         return df, end_idx
 
@@ -166,29 +150,6 @@ def get_data(dataset: str, num_samples: int):
         raise NotImplementedError()
 
 
-"""TO UPDATE FOR NEXT PUSH
-"""
-# def get_single_dataset_train_val(
-#     ds: str,
-#     train_pct: List[int],
-#     val_pct: List[int],
-#     n_train: int,
-#     n_val: int = 100,
-# ):
-
-#     train_data = defaultdict()
-#     val_data = defaultdict()
-
-#     train_samples = int((n_train * train_pct) / 100)
-#     val_samples = int((n_val * val_pct) / 100)
-#     df_train, _ = get_data(ds, train_samples, mode="train")
-#     df_val, _ = get_data(ds, val_samples, mode="val")
-#     train_data["x"] = df_train["x"][: 5 * train_samples]
-#     train_data["y"] = df_train["y"][: 5 * train_samples]
-#     val_data["x"] = df_val["x"][5 * val_samples]
-#     val_data["y"] = df_val["y"][5 * val_samples]
-
-#     return train_data, val_data
 
 
 def get_single_dataset(
