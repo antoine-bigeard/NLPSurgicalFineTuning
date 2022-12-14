@@ -17,9 +17,9 @@
 `eval_only`: 1 to just evaluate the model, 0 to do the training.</br>
 `n_train`: number of training samples per class (5 class in sentiment analysis, 2 in hate speech detection).</br>
 `n_val`: number of validation samples per class. </br>
-`n_epochs`: number of epochs for the training. One epoch goes through all the training samples. <br\>
-`lr`: learning rate. <br\>
-`val_freq`: validation will be done every val_freq steps during the training. <br\>
+`n_epochs`: number of epochs for the training. One epoch goes through all the training samples. </br>
+`lr`: learning rate. </br>
+`val_freq`: validation will be done every val_freq steps during the training. </br>
 
 ### Command example
 Here is an example of a command to run a training for sentiment analysis:
