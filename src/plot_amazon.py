@@ -12,7 +12,7 @@ def plot_curve(
     labels=["(80, 20)", "(60, 40)", "(40, 60)", "(20, 80)", "(0, 100)"],
     color=None,
 ):
-    
+
     modes = ["all", "first", "middle", "last"]
     for mode in modes:
         values = []
@@ -20,28 +20,23 @@ def plot_curve(
             with open(file) as f:
                 data = json.load(f)
                 values.append(data["metric"])
-        
+
         plt.plot(np.array(values), label="fine-tuning " + mode, c=color_codes[mode])
-        
-        # lab = [item.get_text() for item in ax.get_xticklabels()]
-        # if labels is not None:
-        #     for i, l in enumerate(labels):
-        #         lab[i] = l
-        
 
 
 if __name__ == "__main__":
 
-    color_codes = dict({
-        "eval_only" : "royalblue",
-        "first": "forestgreen",
-        "middle": "gold",
-        "last": "darkorange",
-        "all": "firebrick",
-        "pimped_bert": "darkorchid",
-    })
+    color_codes = dict(
+        {
+            "eval_only": "royalblue",
+            "first": "forestgreen",
+            "middle": "gold",
+            "last": "darkorange",
+            "all": "firebrick",
+            "pimped_bert": "darkorchid",
+        }
+    )
     list_files = dict()
-
 
     list_files["all"] = [
         "results/ft/bert-small_amazon_books-amazon_video_val_amazon_books-amazon_video_train_pct_80-20_val_pct_80-20_all_finetune_and_eval.json",

@@ -123,7 +123,6 @@ class WeightClipper(object):
         # filter the variables to get the ones you want
         if hasattr(module, "alphas"):
             w = module.alphas.data
-            # w = w.clamp(-1, 1)
             w = (w.sigmoid() / w.sigmoid().sum()).logit()
             module.alphas.data = w
 
@@ -245,8 +244,6 @@ def ft_bert(
                     {"model_state_dict": model.state_dict()},
                     os.path.join(log_dir, f"last.pt"),
                 )
-                # pbar.set_description(f"Fine-tuning val accuracy: {val_acc:.04f}")
-                # print(f"Fine-tuning val accuracy: {val_acc:.04f}")
                 writer.add_scalar(
                     "acc/val", val_acc, step + epoch * len(train_dataloader)
                 )
@@ -279,9 +276,6 @@ def ft_bert(
                         step + epoch * len(train_dataloader),
                     )
 
-                    # print(f"Accuracy opti only: {val_acc_opti:.04f}")
-                    # print(f"Accuracy frozen only: {val_acc_frozen:.04f}")
-                    # print("Alphas: ", alphas)
                     for i, a in enumerate(alphas):
                         writer.add_scalar(
                             f"alphas/{i}", a, step + epoch * len(train_dataloader)
@@ -322,10 +316,6 @@ def ft_bert(
                     )
                     f.close()
 
-        # torch.save(
-        #     {"model_state_dict": model.state_dict()},
-        #     os.path.join(log_dir, f"last.pt"),
-        # )
         f = open(
             f"src/results/ft/{description_str}.txt",
             "a",
@@ -421,8 +411,6 @@ def run_ft(
 
         print(f"Begin training for {description_str}")
 
-        # path_ckpt = f"results/ft/fine_tuned_{description_str}.pt"
-
         if mode == "pimped_bert":
             if base_model_ckpt is not None:
                 ckpt = torch.load(base_model_ckpt)
@@ -485,44 +473,6 @@ if __name__ == "__main__":
     val_percentages = [int(k) for k in args.val_percentages.split(",")]
     idxs_alphas = [int(k) for k in args.idxs_alphas.split(",")]
 
-    # run_ft(
-    #     models=["bert-small"],
-    #     train_datasets=["amazon_books", "amazon_video"],
-    #     val_datasets=["amazon_books", "amazon_video"],
-    #     train_percentages=[80, 20],
-    #     val_percentages=[80, 20],
-    #     modes=["all"],
-    #     batch_size=128,
-    #     n_epochs=4,
-    #     n_train=200,
-    #     n_val=10,
-    #     # base_model_ckpt="logs/all_fine_tuned_books/ckpt_epoch_0_step_1250.pt",
-    #     load_path_ckpt="logs/all_fine_tuned_books/ckpt_epoch_0_step_1250.pt",
-    #     eval_only=1,
-    #     learning_rate=1e-4,
-    #     idxs_alphas=[1, 1, 1, 1, 1],
-    #     val_freq=50,
-    # )
-    # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
-    # run_ft(
-    #     models=["bert-med"],
-    #     train_datasets=["amazon_electronics"],
-    #     val_datasets=["amazon_electronics"],
-    #     train_percentages=[100],
-    #     val_percentages=[100],
-    #     modes=["pimped_bert"],
-    #     batch_size=128,
-    #     n_epochs=10,
-    #     n_train=10000,
-    #     n_val=10,
-    #     # base_model_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_all_finetune_and_eval.pt",
-    #     # load_path_ckpt="ckpts/bert-med_train_amazon_electronics_val_amazon_electronics_train_pct_100_val_pct_100_pimped_bert_finetune_and_eval.pt",
-    #     eval_only=0,
-    #     learning_rate=1e-3,
-    #     idxs_alphas=None,
-    #     val_freq=50,
-    # )
-    # python src/main.py --model bert-med --mode pimped_bert --train_dataset amazon_books --val_dataset amazon_books --train_percentages 100 --val_percentages 100 --batch_size 16 --n_train 10000 --n_val 100 --eval_only 0    run_ft(
     run_ft(
         models=args.model.split(","),
         train_datasets=args.train_dataset.split(","),
