@@ -6,7 +6,6 @@ from src.utils import count_parameters
 from utils import *
 
 import argparse
-import copy
 import os
 import itertools
 import json
@@ -15,7 +14,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import transformers
 import tqdm
-import yaml
 from torch.utils.tensorboard import SummaryWriter
 
 torch.set_num_threads(10)
