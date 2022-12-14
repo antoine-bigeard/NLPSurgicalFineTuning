@@ -26,12 +26,12 @@ Coding: since one part of the project used similar datasets and coding as HW3, w
 ### Command example
 Here is an example of a command to run a training for sentiment analysis:
 ```
-python main.py --model bert-med --train_percentages 80,20 --val_percentages 80,20 --train_dataset amazon_books --val_dataset amazon_books,amazon_video --device cuda --mode all,last,first,middle --n_train 5000 --n_val 100
+python src/main.py --model bert-med --train_percentages 80,20 --val_percentages 80,20 --train_dataset amazon_books --val_dataset amazon_books,amazon_video --device cuda --mode all,last,first,middle --n_train 5000 --n_val 100
 ```
 
 And one for hate speech detection:
 ```
-python main.py --model bert-med --train_percentages 80,20 --val_percentages 80,20 --train_dataset civil_comments,tweet_eval --val_dataset civil_comments,tweet_eval --device cuda --mode all,last,first,middle --n_train 5000 --n_val 100
+python src/main.py --model bert-med --train_percentages 80,20 --val_percentages 80,20 --train_dataset civil_comments,tweet_eval --val_dataset civil_comments,tweet_eval --device cuda --mode all,last,first,middle --n_train 5000 --n_val 100
 ```
 
 ### Saving experiments
