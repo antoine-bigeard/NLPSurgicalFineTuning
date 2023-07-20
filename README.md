@@ -1,6 +1,6 @@
 # NLPSurgicalFineTuning
 
-[Final poster]("CS 330 Project Poster - Coefficient-based fine-tuning of language models on distribution shift.jpg")
+![Final poster]("CS 330 Project Poster - Coefficient-based fine-tuning of language models on distribution shift.jpg")
 
 ##
 Coding: since one part of the project used similar datasets and coding as HW3, we based our code on HW3 code starter. We of course changed major parts for efficiency and to adapt to our idea. That includes the way we handle data (with dataloaders), the training loop, the saving of the experiments (with tensorboard logger) and other things like the model we build.
